@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional Healthcare Revenue Performance Analysis Tool with Advanced Statistical Methodology">
+    <meta name="keywords" content="healthcare, revenue analysis, predictive modeling, statistical analysis">
+    <meta name="author" content="gkotzbauer">
+    
+    <title>RMT Healthcare Revenue Performance Analysis</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzI1NjNlYiIvPgo8cGF0aCBkPSJNOCAxMmg0djhoLTR2LTh6bTYgMGg0djhoLTR2LTh6bTYgMGg0djhoLTR2LTh6IiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing Analysis</div>
+            <div class="loading-subtext">Applying statistical methodology...</div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div class="app-container">
+        <!-- Application Header -->
+        <header class="app-header">
+            <h1 class="app-title">
+                <i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>
+                RMT Healthcare Revenue Analysis
+            </h1>
+            <p class="app-subtitle">
+                Advanced Statistical Methodology • Predictive Modeling • Performance Classification
+            </p>
+        </header>
+
+        <!-- Status Messages Container -->
+        <div id="statusContainer"></div>
+
+        <!-- Main Content Grid -->
+        <div class="main-content">
+            <!-- Left Sidebar: Control Panel -->
+            <aside class="control-panel">
+                <!-- File Upload Section -->
+                <section class="control-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-upload icon"></i>
+                        Data Import
+                    </h3>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            Drop Excel file here or click to browse
+                        </div>
+                        <div class="upload-subtext">
+                            Supports .xlsx and .xls formats
+                        </div>
+                        <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls">
+                    </div>
+                    
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-stats" id="fileStats"></div>
+                    </div>
+                </section>
+
+                <!-- Analysis Controls -->
+                <section class="control-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cogs icon"></i>
+                        Analysis Controls
+                    </h3>
+                    
+                    <button id="runAnalysisBtn" class="btn btn-primary btn-full btn-large" disabled>
+                        <i class="fas fa-play"></i>
+                        Run Statistical Analysis
+                    </button>
+                    
+                    <div class="progress-container" id="progressContainer" style="display: none;">
+                        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button id="resetBtn" class="btn btn-secondary btn-full">
+                            <i class="fas fa-refresh"></i>
+                            Reset Analysis
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Export Options -->
+                <section class="control-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-download icon"></i>
+                        Export Results
+                    </h3>
+                    
+                    <div class="export-options">
+                        <div class="export-option" id="exportCsvBtn" title="Export detailed results to CSV">
+                            <div class="export-icon">
+                                <i class="fas fa-file-csv"></i>
+                            </div>
+                            <div class="export-title">CSV Report</div>
+                            <div class="export-description">Detailed analysis data</div>
+                        </div>
+                        
+                        <div class="export-option" id="exportPdfBtn" title="Export summary report to PDF">
+                            <div class="export-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="export-title">PDF Report</div>
+                            <div class="export-description">Executive summary</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Model Information -->
+                <section class="control-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle icon"></i>
+                        Model Info
+                    </h3>
+                    
+                    <div id="modelInfo" style="font-size: 0.875rem; color: var(--gray-600);">
+                        <div><strong>Methodology:</strong> Train/Test Split</div>
+                        <div><strong>Validation:</strong> 80/20 Chronological</div>
+                        <div><strong>Models:</strong> 4 Comparative Algorithms</div>
+                        <div><strong>Metrics:</strong> MAE, RMSE, MAPE, R²</div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Content: Analysis Dashboard -->
+            <main class="analysis-dashboard">
+                <!-- Dashboard Navigation -->
+                <nav class="dashboard-nav">
+                    <button class="nav-tab active" data-tab="overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Overview
+                    </button>
+                    <button class="nav-tab" data-tab="performance">
+                        <i class="fas fa-chart-bar"></i>
+                        Performance
+                    </button>
+                    <button class="nav-tab" data-tab="trends">
+                        <i class="fas fa-chart-line"></i>
+                        Trends
+                    </button>
+                    <button class="nav-tab" data-tab="insights">
+                        <i class="fas fa-lightbulb"></i>
+                        Insights
+                    </button>
+                    <button class="nav-tab" data-tab="data">
+                        <i class="fas fa-table"></i>
+                        Data
+                    </button>
+                </nav>
+
+                <!-- Tab Content Containers -->
+                
+                <!-- Overview Tab -->
+                <div id="overview" class="tab-content active">
+                    <div class="metrics-grid" id="overviewMetrics">
+                        <div class="metric-card">
+                            <div class="metric-value" id="totalWeeks">--</div>
+                            <div class="metric-label">Weeks Analyzed</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="modelAccuracy">--</div>
+                            <div class="metric-label">Model Accuracy</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="bestModel">--</div>
+                            <div class="metric-label">Best Model</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="avgRevenue">--</div>
+                            <div class="metric-label">Avg Weekly Revenue</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Revenue Performance Overview</h4>
+                            <div class="chart-controls">
+                                <button class="btn btn-secondary" id="refreshOverview">
+                                    <i class="fas fa-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="overviewChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Tab -->
+                <div id="performance" class="tab-content">
+                    <div class="metrics-grid" id="performanceMetrics">
+                        <div class="metric-card">
+                            <div class="metric-value" id="overPerformed">--</div>
+                            <div class="metric-label">Over Performed</div>
+                            <div class="metric-change positive" id="overPerformedPct">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="averagePerformed">--</div>
+                            <div class="metric-label">Average Performance</div>
+                            <div class="metric-change" id="averagePerformedPct">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="underPerformed">--</div>
+                            <div class="metric-label">Under Performed</div>
+                            <div class="metric-change negative" id="underPerformedPct">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="modelMAE">--</div>
+                            <div class="metric-label">Mean Absolute Error</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Actual vs Predicted Revenue</h4>
+                            <div class="chart-controls">
+                                <select id="performanceFilter" class="btn btn-secondary">
+                                    <option value="all">All Weeks</option>
+                                    <option value="over">Over Performed</option>
+                                    <option value="under">Under Performed</option>
+                                    <option value="average">Average</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="performanceChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trends Tab -->
+                <div id="trends" class="tab-content">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Revenue Trends Over Time</h4>
+                            <div class="chart-controls">
+                                <button class="btn btn-secondary" data-trend="revenue">Revenue</button>
+                                <button class="btn btn-secondary" data-trend="visits">Visits</button>
+                                <button class="btn btn-secondary" data-trend="collection">Collection</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="trendsChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Payer Mix Analysis</h4>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="payerChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Tab -->
+                <div id="insights" class="tab-content">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Key Performance Drivers</h4>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="correlationChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="data-table" id="insightsTable">
+                            <thead>
+                                <tr>
+                                    <th>Week</th>
+                                    <th>Performance</th>
+                                    <th>Key Insights</th>
+                                    <th>Recommendations</th>
+                                </tr>
+                            </thead>
+                            <tbody id="insightsTableBody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                                        Run analysis to view insights
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Data Tab -->
+                <div id="data" class="tab-content">
+                    <div class="data-table-container">
+                        <div class="chart-header" style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">
+                            <h4 class="chart-title">Detailed Analysis Results</h4>
+                            <div class="chart-controls">
+                                <input type="search" id="dataSearch" placeholder="Search data..." 
+                                       style="padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: var(--radius-sm);">
+                                <button class="btn btn-secondary" id="exportDataBtn">
+                                    <i class="fas fa-download"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        <div style="max-height: 500px; overflow-y: auto;">
+                            <table class="data-table" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>Week</th>
+                                        <th>Actual Revenue</th>
+                                        <th>Predicted Revenue</th>
+                                        <th>Error</th>
+                                        <th>Performance</th>
+                                        <th>Key Factors</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                            <i class="fas fa-table" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                                            Upload data and run analysis to view results
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Console Output -->
+        <div class="console-container" id="consoleContainer" style="display: none;">
+            <div class="console-header">
+                <h4 class="console-title">Analysis Console</h4>
+                <button class="btn btn-secondary" id="toggleConsole" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <i class="fas fa-eye-slash"></i>
+                    Hide
+                </button>
+            </div>
+            <div class="console-content" id="consoleContent">
+                Ready to process healthcare revenue data...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 2rem; color: var(--gray-600); font-size: 0.875rem;">
+            <p>
+                © 2025 RMT Healthcare Revenue Analysis Tool • 
+                Built with Advanced Statistical Methodology • 
+                <a href="https://github.com/gkotzbauer/RMT-Revenue-Performance-Analysis" 
+                   target="_blank" style="color: var(--primary-blue); text-decoration: none;">
+                    <i class="fab fa-github"></i> View Source
+                </a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Application Modules -->
+    <script type="module" src="src/js/main.js"></script>
+    
+    <!-- Initialize App -->
+    <script>
+        // Initialize console logging
+        window.consoleLog = function(message, type = 'info') {
+            const consoleContent = document.getElementById('consoleContent');
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = document.createElement('div');
+            logLine.className = `console-line ${type}`;
+            logLine.textContent = `[${timestamp}] ${message}`;
+            consoleContent.appendChild(logLine);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+        };
+
+        // Show console on first analysis
+        window.showConsole = function() {
+            document.getElementById('consoleContainer').style.display = 'block';
+        };
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Application Error:', e.error);
+            window.consoleLog(`Error: ${e.error.message}`, 'error');
+        });
+
+        // Service worker registration (if needed for PWA)
+        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+            navigator.serviceWorker.register('/sw.js').catch(console.error);
+        }
+
+        // Initialize app
+        window.consoleLog('RMT Healthcare Revenue Analysis Tool Initialized', 'success');
+        window.consoleLog('Advanced Statistical Methodology Loaded', 'info');
+        window.consoleLog('Ready for Excel file upload...', 'info');
+    </script>
+</body>
+</html>
