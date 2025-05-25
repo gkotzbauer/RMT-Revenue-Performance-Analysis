@@ -24,47 +24,118 @@ class HealthcareRevenueApp {
     init() {
         console.log('🏥 Initializing RMT Healthcare Revenue Analysis Tool');
         
-        // Initialize UI components
-        this.uiManager.init();
-        this.chartManager.init();
-        this.exportManager.init();
+        // Check if required libraries are available
+        const requiredLibraries = {
+            'XLSX': typeof XLSX !== 'undefined',
+            'Chart': typeof Chart !== 'undefined',
+            'lodash (_)': typeof _ !== 'undefined'
+        };
         
-        // Bind events
-        this.bindEvents();
+        console.log('📚 Library availability check:', requiredLibraries);
         
-        // Show welcome message
-        this.showWelcomeMessage();
+        const missingLibraries = Object.entries(requiredLibraries)
+            .filter(([name, available]) => !available)
+            .map(([name]) => name);
+            
+        if (missingLibraries.length > 0) {
+            console.error('❌ Missing required libraries:', missingLibraries);
+            this.showError('Missing Dependencies', `Required libraries not loaded: ${missingLibraries.join(', ')}`);
+            return;
+        }
         
-        console.log('✅ Application initialized successfully');
+        try {
+            // Initialize UI components
+            console.log('🎨 Initializing UI Manager...');
+            this.uiManager.init();
+            
+            console.log('📊 Initializing Chart Manager...');
+            this.chartManager.init();
+            
+            console.log('📋 Initializing Export Manager...');  
+            this.exportManager.init();
+            
+            // Bind events
+            console.log('🔗 Binding events...');
+            this.bindEvents();
+            
+            // Show welcome message
+            this.showWelcomeMessage();
+            
+            console.log('✅ Application initialized successfully');
+            
+        } catch (error) {
+            console.error('❌ Initialization error:', error);
+            this.showError('Initialization Failed', error.message);
+        }
+    }
+
+    showError(title, message) {
+        if (this.uiManager && this.uiManager.showStatus) {
+            this.uiManager.showStatus(`${title}: ${message}`, 'error');
+        } else {
+            console.error(`${title}: ${message}`);
+            alert(`${title}: ${message}`);
+        }
     }
 
     bindEvents() {
+        console.log('🔗 Binding events...');
+        
         // File upload handling
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const runAnalysisBtn = document.getElementById('runAnalysisBtn');
         const resetBtn = document.getElementById('resetBtn');
 
+        console.log('Elements found:', {
+            fileInput: !!fileInput,
+            uploadArea: !!uploadArea,
+            runAnalysisBtn: !!runAnalysisBtn,
+            resetBtn: !!resetBtn
+        });
+
         // File input change
         if (fileInput) {
-            fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+            fileInput.addEventListener('change', (e) => {
+                console.log('📁 File input changed:', e.target.files);
+                this.handleFileSelect(e);
+            });
+            console.log('✅ File input event bound');
+        } else {
+            console.error('❌ File input element not found');
         }
 
         // Drag and drop
         if (uploadArea) {
-            uploadArea.addEventListener('click', () => fileInput?.click());
+            uploadArea.addEventListener('click', () => {
+                console.log('🖱️ Upload area clicked');
+                fileInput?.click();
+            });
             uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
             uploadArea.addEventListener('drop', (e) => this.handleFileDrop(e));
+            console.log('✅ Upload area events bound');
+        } else {
+            console.error('❌ Upload area element not found');
         }
 
         // Analysis button
         if (runAnalysisBtn) {
-            runAnalysisBtn.addEventListener('click', () => this.runAnalysis());
+            runAnalysisBtn.addEventListener('click', () => {
+                console.log('🚀 Analysis button clicked');
+                this.runAnalysis();
+            });
+            console.log('✅ Analysis button event bound');
+        } else {
+            console.error('❌ Analysis button element not found');
         }
 
         // Reset button
         if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetApplication());
+            resetBtn.addEventListener('click', () => {
+                console.log('🔄 Reset button clicked');
+                this.resetApplication();
+            });
+            console.log('✅ Reset button event bound');
         }
 
         // Export buttons
@@ -72,18 +143,32 @@ class HealthcareRevenueApp {
         const exportPdfBtn = document.getElementById('exportPdfBtn');
         
         if (exportCsvBtn) {
-            exportCsvBtn.addEventListener('click', () => this.exportResults('csv'));
+            exportCsvBtn.addEventListener('click', () => {
+                console.log('📋 CSV export clicked');
+                this.exportResults('csv');
+            });
+            console.log('✅ CSV export event bound');
         }
         
         if (exportPdfBtn) {
-            exportPdfBtn.addEventListener('click', () => this.exportResults('pdf'));
+            exportPdfBtn.addEventListener('click', () => {
+                console.log('📄 PDF export clicked');
+                this.exportResults('pdf');
+            });
+            console.log('✅ PDF export event bound');
         }
 
         // Tab navigation
         const navTabs = document.querySelectorAll('.nav-tab');
-        navTabs.forEach(tab => {
-            tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+        console.log('📑 Found nav tabs:', navTabs.length);
+        navTabs.forEach((tab, index) => {
+            tab.addEventListener('click', (e) => {
+                console.log(`📑 Tab clicked: ${e.target.dataset.tab}`);
+                this.switchTab(e.target.dataset.tab);
+            });
         });
+        
+        console.log('✅ All events bound successfully');
     }
 
     showWelcomeMessage() {
@@ -118,19 +203,31 @@ class HealthcareRevenueApp {
     }
 
     async processFile(file) {
-        console.log('📄 Processing file:', file.name);
+        console.log('📄 Processing file:', file.name, 'Size:', file.size, 'bytes');
         
         try {
+            // Check if XLSX is available
+            if (typeof XLSX === 'undefined') {
+                throw new Error('XLSX library is not loaded. Please refresh the page and try again.');
+            }
+            
+            console.log('✅ XLSX library is available');
+            
             // Validate file type
             if (!this.validateFileType(file)) {
                 throw new Error('Please upload an Excel file (.xlsx or .xls)');
             }
+            
+            console.log('✅ File type validation passed');
 
             // Show loading state
             this.uiManager.showLoading('Reading Excel file...');
+            console.log('📊 Starting file analysis...');
 
             // Process the file
             const data = await this.analyzer.loadExcelFile(file);
+            console.log('✅ File processed, records found:', data.length);
+            
             this.currentData = data;
 
             // Update UI
@@ -140,12 +237,23 @@ class HealthcareRevenueApp {
             
             this.uiManager.showStatus(`✅ File loaded successfully: ${data.length} records found`, 'success');
             
-            console.log('✅ File processed successfully:', data.length, 'records');
+            console.log('✅ File processing completed successfully');
 
         } catch (error) {
             console.error('❌ File processing error:', error);
+            console.error('Error stack:', error.stack);
+            
             this.uiManager.hideLoading();
             this.uiManager.showStatus(`Error processing file: ${error.message}`, 'error');
+            
+            // Show additional debug info
+            console.log('🔍 Debug info:', {
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type,
+                xlsxAvailable: typeof XLSX !== 'undefined',
+                analyzerAvailable: !!this.analyzer
+            });
         }
     }
 
@@ -419,7 +527,45 @@ class HealthcareRevenueApp {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.healthcareApp = new HealthcareRevenueApp();
+    console.log('🚀 DOM loaded, initializing healthcare app...');
+    
+    try {
+        // Wait a moment for external libraries to load
+        setTimeout(() => {
+            console.log('📱 Creating HealthcareRevenueApp instance...');
+            window.healthcareApp = new HealthcareRevenueApp();
+            console.log('✅ Healthcare app created and assigned to window.healthcareApp');
+        }, 500);
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize healthcare app:', error);
+        console.error('Error details:', error.stack);
+        
+        // Show error to user
+        setTimeout(() => {
+            const statusContainer = document.getElementById('statusContainer');
+            if (statusContainer) {
+                statusContainer.innerHTML = `
+                    <div class="status-message error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Application failed to initialize: ${error.message}</span>
+                    </div>
+                `;
+            }
+        }, 100);
+    }
+});
+
+// Add global error handler
+window.addEventListener('error', (e) => {
+    console.error('🚨 Global error caught:', e.error);
+    console.error('Error details:', {
+        message: e.message,
+        filename: e.filename,
+        lineno: e.lineno,
+        colno: e.colno,
+        stack: e.error?.stack
+    });
 });
 
 // Export for use in other modules
