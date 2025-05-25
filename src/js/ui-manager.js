@@ -1,395 +1,295 @@
-// UI Manager - Handles all user interface interactions and state management
+// ============================================================================
+// UI Manager - Healthcare Revenue Analysis Interface
+// Handles all user interface interactions and state management
+// ============================================================================
 
 export class UIManager {
     constructor() {
-        this.currentSection = 'upload';
-        this.notifications = [];
+        this.loadingOverlay = null;
+        this.statusContainer = null;
+        this.progressBar = null;
+        this.fileInfo = null;
+        this.runAnalysisBtn = null;
     }
 
-    hideAllSections() {
-        const sections = ['upload-section', 'loading-section', 'results-section'];
-        sections.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.classList.add('hidden');
-                section.classList.remove('fade-in', 'slide-up');
+    init() {
+        console.log('🎨 Initializing UI Manager...');
+        
+        // Get references to key UI elements
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+        this.statusContainer = document.getElementById('statusContainer');
+        this.progressBar = document.getElementById('progressBar');
+        this.fileInfo = document.getElementById('fileInfo');
+        this.runAnalysisBtn = document.getElementById('runAnalysisBtn');
+        this.progressContainer = document.getElementById('progressContainer');
+        
+        // Initialize console toggle
+        this.initializeConsoleToggle();
+        
+        console.log('✅ UI Manager initialized');
+    }
+
+    initializeConsoleToggle() {
+        const toggleConsoleBtn = document.getElementById('toggleConsole');
+        const consoleContainer = document.getElementById('consoleContainer');
+        
+        if (toggleConsoleBtn && consoleContainer) {
+            toggleConsoleBtn.addEventListener('click', () => {
+                const isVisible = consoleContainer.style.display !== 'none';
+                consoleContainer.style.display = isVisible ? 'none' : 'block';
+                
+                const icon = toggleConsoleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = isVisible ? 'fas fa-eye' : 'fas fa-eye-slash';
+                }
+                
+                toggleConsoleBtn.innerHTML = isVisible ? 
+                    '<i class="fas fa-eye"></i> Show' : 
+                    '<i class="fas fa-eye-slash"></i> Hide';
+            });
+        }
+    }
+
+    showStatus(message, type = 'info') {
+        if (!this.statusContainer) return;
+
+        // Remove existing status messages
+        this.statusContainer.innerHTML = '';
+
+        // Create status message element
+        const statusMessage = document.createElement('div');
+        statusMessage.className = `status-message ${type}`;
+        
+        // Add appropriate icon
+        let icon = 'fas fa-info-circle';
+        switch (type) {
+            case 'success':
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                icon = 'fas fa-exclamation-triangle';
+                break;
+        }
+        
+        statusMessage.innerHTML = `
+            <i class="${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        this.statusContainer.appendChild(statusMessage);
+        
+        // Auto-remove success messages after 5 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                if (statusMessage.parentNode) {
+                    statusMessage.remove();
+                }
+            }, 5000);
+        }
+
+        // Log to console
+        window.consoleLog?.(message, type);
+    }
+
+    showLoading(message = 'Processing...') {
+        if (this.loadingOverlay) {
+            this.loadingOverlay.style.display = 'flex';
+            
+            const loadingText = this.loadingOverlay.querySelector('.loading-text');
+            if (loadingText) {
+                loadingText.textContent = message;
+            }
+        }
+
+        // Show console if not visible
+        window.showConsole?.();
+    }
+
+    hideLoading() {
+        if (this.loadingOverlay) {
+            this.loadingOverlay.style.display = 'none';
+        }
+        
+        // Hide progress bar
+        if (this.progressContainer) {
+            this.progressContainer.style.display = 'none';
+        }
+    }
+
+    updateProgress(percentage) {
+        if (this.progressBar && this.progressContainer) {
+            this.progressContainer.style.display = 'block';
+            this.progressBar.style.width = `${percentage}%`;
+        }
+    }
+
+    showFileInfo(file, data) {
+        if (!this.fileInfo) return;
+
+        const fileName = document.getElementById('fileName');
+        const fileStats = document.getElementById('fileStats');
+        
+        if (fileName) {
+            fileName.textContent = file.name;
+        }
+        
+        if (fileStats) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const recordCount = data.length;
+            const uniqueWeeks = [...new Set(data.map(r => `${r.year}-${r.week}`))].length;
+            
+            fileStats.innerHTML = `
+                <div>📁 Size: ${fileSize} MB</div>
+                <div>📊 Records: ${recordCount.toLocaleString()}</div>
+                <div>📅 Weeks: ${uniqueWeeks}</div>
+                <div>✅ Ready for analysis</div>
+            `;
+        }
+        
+        // Show file info panel
+        this.fileInfo.classList.add('show');
+        
+        // Update upload area appearance
+        const uploadArea = document.getElementById('uploadArea');
+        if (uploadArea) {
+            uploadArea.classList.add('file-loaded');
+        }
+    }
+
+    enableAnalysisButton() {
+        if (this.runAnalysisBtn) {
+            this.runAnalysisBtn.disabled = false;
+            this.runAnalysisBtn.innerHTML = `
+                <i class="fas fa-play"></i>
+                Run Statistical Analysis
+            `;
+        }
+    }
+
+    disableAnalysisButton() {
+        if (this.runAnalysisBtn) {
+            this.runAnalysisBtn.disabled = true;
+            this.runAnalysisBtn.innerHTML = `
+                <i class="fas fa-upload"></i>
+                Upload Excel File First
+            `;
+        }
+    }
+
+    reset() {
+        console.log('🔄 Resetting UI...');
+        
+        // Clear status messages
+        if (this.statusContainer) {
+            this.statusContainer.innerHTML = '';
+        }
+        
+        // Hide file info
+        if (this.fileInfo) {
+            this.fileInfo.classList.remove('show');
+        }
+        
+        // Reset upload area
+        const uploadArea = document.getElementById('uploadArea');
+        if (uploadArea) {
+            uploadArea.classList.remove('file-loaded');
+        }
+        
+        // Disable analysis button
+        this.disableAnalysisButton();
+        
+        // Hide loading and progress
+        this.hideLoading();
+        
+        // Reset all metric displays
+        this.resetMetricDisplays();
+        
+        // Clear data tables
+        this.clearDataTables();
+        
+        console.log('✅ UI reset complete');
+    }
+
+    resetMetricDisplays() {
+        const metricElements = [
+            'totalWeeks', 'modelAccuracy', 'bestModel', 'avgRevenue',
+            'overPerformed', 'averagePerformed', 'underPerformed', 'modelMAE',
+            'overPerformedPct', 'averagePerformedPct', 'underPerformedPct'
+        ];
+        
+        metricElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = '--';
             }
         });
     }
 
-    showSection(sectionId) {
-        this.hideAllSections();
-        const section = document.getElementById(sectionId);
-        if (section) {
-            section.classList.remove('hidden');
-            section.classList.add('fade-in');
-            this.currentSection = sectionId.replace('-section', '');
+    clearDataTables() {
+        // Clear insights table
+        const insightsTableBody = document.getElementById('insightsTableBody');
+        if (insightsTableBody) {
+            insightsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                        <i class="fas fa-chart-bar" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Run analysis to view insights
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Clear main data table
+        const dataTableBody = document.getElementById('dataTableBody');
+        if (dataTableBody) {
+            dataTableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                        <i class="fas fa-table" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Upload data and run analysis to view results
+                    </td>
+                </tr>
+            `;
         }
     }
 
-    showNotification(message, type = 'info', duration = 5000) {
-        const notification = this.createNotification(message, type);
-        document.body.appendChild(notification);
+    showError(title, message, details = null) {
+        this.showStatus(`${title}: ${message}`, 'error');
         
-        // Animate in
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 100);
-        
-        // Auto-remove
-        setTimeout(() => {
-            this.removeNotification(notification);
-        }, duration);
-        
-        // Store reference
-        this.notifications.push(notification);
-    }
-
-    createNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        
-        const icon = this.getNotificationIcon(type);
-        
-        notification.innerHTML = `
-            <div class="notification-content">
-                <span class="notification-icon">${icon}</span>
-                <span class="notification-message">${message}</span>
-                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
-            </div>
-        `;
-        
-        // Add styles if not already added
-        this.ensureNotificationStyles();
-        
-        return notification;
-    }
-
-    getNotificationIcon(type) {
-        const icons = {
-            'success': '✅',
-            'error': '❌',
-            'warning': '⚠️',
-            'info': 'ℹ️'
-        };
-        return icons[type] || icons.info;
-    }
-
-    ensureNotificationStyles() {
-        if (document.getElementById('notification-styles')) return;
-        
-        const styles = document.createElement('style');
-        styles.id = 'notification-styles';
-        styles.textContent = `
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                max-width: 400px;
-                padding: 1rem;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                z-index: 1000;
-                transform: translateX(100%);
-                transition: transform 0.3s ease, opacity 0.3s ease;
-                opacity: 0;
-                margin-bottom: 10px;
-            }
-            
-            .notification.show {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            
-            .notification.success {
-                background: #d1fae5;
-                border-left: 4px solid #059669;
-                color: #065f46;
-            }
-            
-            .notification.error {
-                background: #fee2e2;
-                border-left: 4px solid #dc2626;
-                color: #991b1b;
-            }
-            
-            .notification.warning {
-                background: #fef3c7;
-                border-left: 4px solid #d97706;
-                color: #92400e;
-            }
-            
-            .notification.info {
-                background: #dbeafe;
-                border-left: 4px solid #2563eb;
-                color: #1e40af;
-            }
-            
-            .notification-content {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-            }
-            
-            .notification-icon {
-                font-size: 1.25rem;
-                flex-shrink: 0;
-            }
-            
-            .notification-message {
-                flex: 1;
-                line-height: 1.5;
-            }
-            
-            .notification-close {
-                background: none;
-                border: none;
-                font-size: 1.25rem;
-                cursor: pointer;
-                opacity: 0.7;
-                transition: opacity 0.2s ease;
-                padding: 0;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .notification-close:hover {
-                opacity: 1;
-            }
-            
-            @media (max-width: 768px) {
-                .notification {
-                    right: 10px;
-                    left: 10px;
-                    max-width: none;
-                    transform: translateY(-100%);
-                }
-                
-                .notification.show {
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(styles);
-    }
-
-    removeNotification(notification) {
-        if (notification && notification.parentElement) {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 300);
-            
-            // Remove from tracking array
-            this.notifications = this.notifications.filter(n => n !== notification);
+        if (details) {
+            console.error('Error details:', details);
+            window.consoleLog?.(`Error details: ${JSON.stringify(details)}`, 'error');
         }
     }
 
     showSuccess(message) {
-        this.showNotification(message, 'success');
-    }
-
-    showError(message) {
-        this.showNotification(message, 'error');
+        this.showStatus(message, 'success');
     }
 
     showWarning(message) {
-        this.showNotification(message, 'warning');
+        this.showStatus(message, 'warning');
     }
 
     showInfo(message) {
-        this.showNotification(message, 'info');
+        this.showStatus(message, 'info');
     }
 
-    updateProgress(percentage, status = '') {
-        const progressFill = document.getElementById('progress-fill');
-        const loadingStatus = document.getElementById('loading-status');
-        
-        if (progressFill) {
-            progressFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
-        }
-        
-        if (loadingStatus && status) {
-            loadingStatus.textContent = status;
-        }
-    }
-
-    setLoadingState(isLoading, message = '') {
-        const loadingSection = document.getElementById('loading-section');
-        const loadingStatus = document.getElementById('loading-status');
-        
-        if (isLoading) {
-            this.showSection('loading-section');
-            if (message && loadingStatus) {
-                loadingStatus.textContent = message;
-            }
-        } else {
-            loadingSection?.classList.add('hidden');
-        }
-    }
-
-    populateTable(data, tableId = 'results-table') {
-        const table = document.getElementById(tableId);
-        if (!table || !data || data.length === 0) return;
-        
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-        
-        // Clear existing data
-        tbody.innerHTML = '';
-        
-        // Add rows
-        data.forEach((row, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = this.createTableRow(row, index);
-            tbody.appendChild(tr);
-        });
-    }
-
-    createTableRow(rowData, index) {
-        // This method should be customized based on your data structure
-        const performance = rowData['Performance Diagnostic'] || '';
-        const performanceClass = performance.toLowerCase().replace(/\s+/g, '-');
-        
-        return `
-            <td>${rowData.Year || ''}</td>
-            <td>${rowData.Week || ''}</td>
-            <td>$${this.formatNumber(parseFloat(rowData['Actual Total Payments'] || 0))}</td>
-            <td>$${this.formatNumber(parseFloat(rowData['Predicted Total Payments'] || 0))}</td>
-            <td>${rowData['Percent Error'] || ''}</td>
-            <td>
-                <span class="performance-badge performance-${performanceClass}">
-                    ${performance}
-                </span>
-            </td>
-            <td class="text-small">${this.truncateText(rowData['What Went Well'] || '', 100)}</td>
-            <td class="text-small">${this.truncateText(rowData['What Could Be Improved'] || '', 100)}</td>
-            <td class="text-small">${this.truncateText(rowData['BCBS Analysis'] || '', 80)}</td>
-            <td class="text-small">${this.truncateText(rowData['Aetna Analysis'] || '', 80)}</td>
-        `;
-    }
-
-    formatNumber(num) {
-        if (isNaN(num)) return '0';
-        return new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(num);
-    }
-
-    truncateText(text, maxLength) {
-        if (!text || text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
-    }
-
-    addTableSearch(inputId, tableId) {
-        const searchInput = document.getElementById(inputId);
-        const table = document.getElementById(tableId);
-        
-        if (!searchInput || !table) return;
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = table.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-            
-            // Update visible count
-            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-            this.updateSearchResults(visibleRows.length, rows.length);
-        });
-    }
-
-    updateSearchResults(visible, total) {
-        let resultsInfo = document.getElementById('search-results-info');
-        if (!resultsInfo) {
-            resultsInfo = document.createElement('div');
-            resultsInfo.id = 'search-results-info';
-            resultsInfo.className = 'search-results-info';
-            
-            const searchInput = document.getElementById('search-input');
-            if (searchInput && searchInput.parentElement) {
-                searchInput.parentElement.appendChild(resultsInfo);
-            }
-        }
-        
-        if (visible === total) {
-            resultsInfo.textContent = '';
-        } else {
-            resultsInfo.textContent = `Showing ${visible} of ${total} results`;
-        }
-    }
-
-    showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        }
-    }
-
-    hideModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = ''; // Restore scrolling
-        }
-    }
-
-    setupModalEvents(modalId, closeButtonId, closeOnBackdrop = true) {
-        const modal = document.getElementById(modalId);
-        const closeButton = document.getElementById(closeButtonId);
-        
-        if (closeButton) {
-            closeButton.addEventListener('click', () => this.hideModal(modalId));
-        }
-        
-        if (closeOnBackdrop && modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.hideModal(modalId);
-                }
-            });
-        }
-        
-        // ESC key to close
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideModal(modalId);
-            }
-        });
-    }
-
-    animateValue(elementId, start, end, duration = 1000) {
-        const element = document.getElementById(elementId);
+    // Animation utilities
+    fadeIn(element, duration = 300) {
         if (!element) return;
         
-        const startTime = performance.now();
-        const isNumber = !isNaN(end);
+        element.style.opacity = '0';
+        element.style.display = 'block';
         
-        const animate = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
+        let start = null;
+        const animate = (timestamp) => {
+            if (!start) start = timestamp;
+            const progress = (timestamp - start) / duration;
             
-            const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
-            
-            if (isNumber) {
-                const current = start + (end - start) * easeOut;
-                element.textContent = Math.round(current).toLocaleString();
-            } else {
-                // For non-numeric values, just set at the end
-                if (progress === 1) {
-                    element.textContent = end;
-                }
-            }
+            element.style.opacity = Math.min(progress, 1);
             
             if (progress < 1) {
                 requestAnimationFrame(animate);
@@ -399,92 +299,78 @@ export class UIManager {
         requestAnimationFrame(animate);
     }
 
-    createLoadingState(text = 'Loading...') {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading-state';
-        loadingDiv.innerHTML = `
-            <div class="loading-spinner"></div>
-            <div class="loading-text">${text}</div>
-        `;
-        return loadingDiv;
-    }
-
-    addTableSorting(tableId) {
-        const table = document.getElementById(tableId);
-        if (!table) return;
+    fadeOut(element, duration = 300) {
+        if (!element) return;
         
-        const headers = table.querySelectorAll('th');
-        headers.forEach((header, index) => {
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', () => {
-                this.sortTable(table, index);
-            });
-        });
-    }
-
-    sortTable(table, columnIndex) {
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
+        let start = null;
+        const initialOpacity = parseFloat(getComputedStyle(element).opacity) || 1;
         
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        const isNumeric = this.isNumericColumn(rows, columnIndex);
-        
-        // Determine sort direction
-        const currentSort = table.getAttribute('data-sort-column');
-        const currentDirection = table.getAttribute('data-sort-direction');
-        const isAscending = currentSort != columnIndex || currentDirection === 'desc';
-        
-        rows.sort((a, b) => {
-            const aValue = this.getCellValue(a, columnIndex);
-            const bValue = this.getCellValue(b, columnIndex);
+        const animate = (timestamp) => {
+            if (!start) start = timestamp;
+            const progress = (timestamp - start) / duration;
             
-            let comparison;
-            if (isNumeric) {
-                comparison = parseFloat(aValue || 0) - parseFloat(bValue || 0);
+            element.style.opacity = initialOpacity * (1 - Math.min(progress, 1));
+            
+            if (progress >= 1) {
+                element.style.display = 'none';
             } else {
-                comparison = aValue.localeCompare(bValue);
+                requestAnimationFrame(animate);
             }
-            
-            return isAscending ? comparison : -comparison;
-        });
+        };
         
-        // Update table
-        rows.forEach(row => tbody.appendChild(row));
+        requestAnimationFrame(animate);
+    }
+
+    // Utility to format numbers for display
+    formatNumber(num, decimals = 0) {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(num);
+    }
+
+    // Utility to format currency
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
+
+    // Utility to format percentage
+    formatPercentage(value, decimals = 1) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'percent',
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(value);
+    }
+
+    // Handle responsive behavior
+    handleResize() {
+        const isMobile = window.innerWidth < 768;
+        const mainContent = document.querySelector('.main-content');
         
-        // Update sort indicators
-        table.setAttribute('data-sort-column', columnIndex);
-        table.setAttribute('data-sort-direction', isAscending ? 'asc' : 'desc');
-        
-        // Update header indicators
-        const headers = table.querySelectorAll('th');
-        headers.forEach((header, index) => {
-            header.classList.remove('sort-asc', 'sort-desc');
-            if (index === columnIndex) {
-                header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
+        if (mainContent) {
+            if (isMobile) {
+                mainContent.style.gridTemplateColumns = '1fr';
+            } else {
+                mainContent.style.gridTemplateColumns = '1fr 2fr';
             }
-        });
+        }
     }
 
-    getCellValue(row, columnIndex) {
-        const cell = row.cells[columnIndex];
-        return cell ? cell.textContent.trim() : '';
-    }
-
-    isNumericColumn(rows, columnIndex) {
-        if (rows.length === 0) return false;
-        
-        const sampleValues = rows.slice(0, 5).map(row => {
-            const value = this.getCellValue(row, columnIndex);
-            return value.replace(/[$,\s%]/g, ''); // Remove currency and percentage symbols
-        });
-        
-        return sampleValues.every(value => !isNaN(parseFloat(value)));
-    }
-
-    clearNotifications() {
-        this.notifications.forEach(notification => {
-            this.removeNotification(notification);
-        });
-        this.notifications = [];
+    // Initialize responsive handlers
+    initializeResponsive() {
+        window.addEventListener('resize', () => this.handleResize());
+        this.handleResize(); // Initial call
     }
 }
+
+// Initialize responsive behavior when DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    const uiManager = new UIManager();
+    uiManager.initializeResponsive?.();
+});
