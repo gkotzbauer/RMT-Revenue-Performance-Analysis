@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: rmt-healthcare-analysis
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npm run build:production
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    preDeployCommand: echo "Pre-deploy hook - build validation"
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "18"
+      - key: NPM_CONFIG_AUDIT_LEVEL
+        value: moderate
+        
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 80
+      targetCPUPercent: 80
+      
+    # Disk configuration
+    disk:
+      name: rmt-data
+      mountPath: /app/data
+      sizeGB: 1
+      
+    # Headers for security and performance
+    headers:
+      - path: "/*"
+        name: "X-Content-Type-Options"
+        value: "nosniff"
+      - path: "/*"
+        name: "X-Frame-Options"
+        value: "DENY"
+      - path: "/*"
+        name: "X-XSS-Protection"
+        value: "1; mode=block"
+      - path: "/*"
+        name: "Referrer-Policy"
+        value: "strict-origin-when-cross-origin"
+      - path: "/static/*"
+        name: "Cache-Control"
+        value: "public, max-age=31536000, immutable"
+      - path: "/*.js"
+        name: "Cache-Control"
+        value: "public, max-age=31536000, immutable"
+      - path: "/*.css"
+        name: "Cache-Control"
+        value: "public, max-age=31536000, immutable"
