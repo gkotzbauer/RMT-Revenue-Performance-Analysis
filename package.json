@@ -1,14 +1,17 @@
 {
   "name": "rmt-revenue-performance-analysis",
   "version": "1.0.0",
-  "description": "Healthcare Revenue Performance Analysis Tool with Proper Statistical Methodology",
-  "main": "index.html",
+  "description": "Healthcare Revenue Performance Analysis Tool with Advanced Statistical Methodology",
+  "main": "server.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve": "http-server dist -p 3000",
-    "deploy": "npm run build && gh-pages -d dist"
+    "start": "node server.js",
+    "serve": "npm run build && npm start",
+    "dev:server": "nodemon server.js",
+    "build:production": "NODE_ENV=production npm run build",
+    "deploy": "npm run build:production"
   },
   "keywords": [
     "healthcare", "revenue", "analytics", "statistical-analysis", "predictive-modeling"
@@ -16,6 +19,10 @@
   "author": "gkotzbauer",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
     "lodash": "^4.17.21",
     "xlsx": "^0.18.5",
     "papaparse": "^5.4.1",
@@ -25,14 +32,17 @@
   },
   "devDependencies": {
     "vite": "^5.0.0",
-    "gh-pages": "^6.1.0",
-    "http-server": "^14.1.1",
+    "nodemon": "^3.0.2",
     "@vitejs/plugin-legacy": "^5.2.0",
     "terser": "^5.24.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/gkotzbauer/RMT-Revenue-Performance-Analysis.git"
   },
-  "homepage": "https://gkotzbauer.github.io/RMT-Revenue-Performance-Analysis"
+  "homepage": "https://github.com/gkotzbauer/RMT-Revenue-Performance-Analysis"
 }
