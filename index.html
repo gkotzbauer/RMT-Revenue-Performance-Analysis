@@ -379,12 +379,21 @@
         </footer>
     </div>
 
-    <!-- External Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- External Dependencies - Load in correct order -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Verify libraries loaded -->
+    <script>
+        console.log('📚 Checking library availability...');
+        console.log('XLSX available:', typeof XLSX !== 'undefined');
+        console.log('Chart available:', typeof Chart !== 'undefined');
+        console.log('_ (lodash) available:', typeof _ !== 'undefined');
+        console.log('Papa available:', typeof Papa !== 'undefined');
+    </script>
 
     <!-- Application Modules -->
     <script type="module" src="src/js/main.js"></script>
@@ -412,11 +421,6 @@
             console.error('Application Error:', e.error);
             window.consoleLog(`Error: ${e.error.message}`, 'error');
         });
-
-        // Service worker registration (if needed for PWA)
-        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-            navigator.serviceWorker.register('/sw.js').catch(console.error);
-        }
 
         // Initialize app
         window.consoleLog('RMT Healthcare Revenue Analysis Tool Initialized', 'success');
