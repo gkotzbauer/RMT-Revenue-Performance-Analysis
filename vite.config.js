@@ -46,5 +46,16 @@ export default defineConfig({
   optimizeDeps: { 
     include: ['lodash', 'xlsx', 'chart.js'],
     exclude: []
-  }
+  },
+  plugins: [
+    {
+      name: 'configure-response-headers',
+      configureServer: (server) => {
+        server.middlewares.use((_req, res, next) => {
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          next();
+        });
+      }
+    }
+  ]
 });

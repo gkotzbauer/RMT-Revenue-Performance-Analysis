@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Main Styles -->
-    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="/assets/main.css">
     <style>
         * {
             margin: 0;
@@ -493,29 +493,31 @@
         </div>
     </div>
 
-    <!-- External Dependencies - Load in correct order -->
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-
-    <!-- Main Styles -->
-    <link rel="stylesheet" href="/src/styles/main.css">
-
+    
+    <!-- Main Application -->
+    <script type="module" src="/assets/main.js"></script>
+    
     <!-- Verify libraries loaded -->
     <script>
-        console.log('📚 Checking library availability...');
-        console.log('XLSX available:', typeof XLSX !== 'undefined');
-        console.log('Chart available:', typeof Chart !== 'undefined');
-        console.log('_ (lodash) available:', typeof _ !== 'undefined');
-    </script>
-
-    <!-- Application Modules -->
-    <script type="module">
-        import { HealthcareRevenueApp } from '/src/js/main.js';
-        
-        // Initialize the application when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            window.app = new HealthcareRevenueApp();
+        window.addEventListener('load', () => {
+            const requiredLibraries = {
+                'XLSX': typeof XLSX !== 'undefined',
+                'Chart': typeof Chart !== 'undefined',
+                'lodash (_)': typeof _ !== 'undefined'
+            };
+            
+            const missingLibraries = Object.entries(requiredLibraries)
+                .filter(([name, available]) => !available)
+                .map(([name]) => name);
+                
+            if (missingLibraries.length > 0) {
+                console.error('Missing required libraries:', missingLibraries);
+                alert(`Required libraries not loaded: ${missingLibraries.join(', ')}`);
+            }
         });
     </script>
 </body>
