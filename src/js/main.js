@@ -242,6 +242,8 @@ export class HealthcareRevenueApp {
             // Automatically run analysis after loading the file
             await this.runAnalysis();
 
+            document.getElementById('analysisContainer').style.display = 'block';
+
         } catch (error) {
             console.error('❌ File processing error:', error);
             console.error('Error stack:', error.stack);
@@ -314,6 +316,7 @@ export class HealthcareRevenueApp {
     }
 
     displayResults(results) {
+        console.log('🪵 Analysis results object:', results);
         console.log('📊 Displaying analysis results...');
 
         // Update overview metrics
@@ -570,4 +573,6 @@ window.addEventListener('error', (e) => {
         stack: e.error?.stack
     });
 });
+
+export { HealthcareRevenueApp };
 
