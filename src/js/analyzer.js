@@ -406,6 +406,20 @@ export class HealthcareAnalyzer {
         return { mae, rmse, mape, rSquared, predictions, modelName };
     }
 
+    calculatePerformance(actualPayments, predictedPayments) {
+        if (!actualPayments || !predictedPayments) return 'Average Performance';
+        
+        const percentageDiff = ((actualPayments - predictedPayments) / predictedPayments) * 100;
+        
+        if (percentageDiff > 2.5) {
+            return 'Over Performed';
+        } else if (percentageDiff < -2.5) {
+            return 'Under Performed';
+        } else {
+            return 'Average Performance';
+        }
+    }
+
     classifyPerformance(features, bestModel, trainStats) {
         console.log('🎯 Classifying performance...');
         
@@ -438,14 +452,7 @@ export class HealthcareAnalyzer {
             const absoluteError = Math.abs(actual - predicted);
             const percentError = actual > 0 ? (predicted - actual) / actual : 0;
             
-            let performanceDiagnostic;
-            if (percentError < -0.025) {
-                performanceDiagnostic = 'Under Performed';
-            } else if (percentError > 0.025) {
-                performanceDiagnostic = 'Over Performed';
-            } else {
-                performanceDiagnostic = 'Average Performance';
-            }
+            const performanceDiagnostic = this.calculatePerformance(actual, predicted);
             
             return {
                 weekKey: week.weekKey,
@@ -604,17 +611,5 @@ export class HealthcareAnalyzer {
 
     calculateMean(array) {
         return this.mean(array);
-    }
-
-    calculatePerformance(actualPayments, predictedPayments) {
-        const percentageDiff = ((actualPayments - predictedPayments) / predictedPayments) * 100;
-        
-        if (percentageDiff > 2.5) {
-            return 'Over Performed';
-        } else if (percentageDiff < -2.5) {
-            return 'Under Performed';
-        } else {
-            return 'Average Performance';
-        }
     }
 }

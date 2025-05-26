@@ -71,16 +71,16 @@ export class UIManager {
     }
 
     populateWeekFilter(data) {
-        if (!this.weekFilter || !data) return;
+        if (!data || !Array.isArray(data)) return;
+        
+        // Get unique weeks from the data
+        const uniqueWeeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
         
         // Clear existing options
         this.weekFilter.innerHTML = '';
         
-        // Get unique weeks from data
-        const weeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
-        
-        // Add options for each week
-        weeks.forEach(week => {
+        // Add new options
+        uniqueWeeks.forEach(week => {
             const option = document.createElement('option');
             option.value = week;
             option.textContent = week;
