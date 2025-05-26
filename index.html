@@ -432,6 +432,27 @@
 
         <!-- Analysis Container -->
         <div class="analysis-container" id="analysisContainer">
+            <!-- Filter Section -->
+            <div class="section filter-section">
+                <h2>🔍 Filter Results</h2>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="weekFilter">Week(s)</label>
+                        <select id="weekFilter" multiple class="filter-select">
+                            <!-- Weeks will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="performanceFilter">Performance</label>
+                        <select id="performanceFilter" multiple class="filter-select">
+                            <option value="Over Performed">Over Performed</option>
+                            <option value="Average Performance">Average Performance</option>
+                            <option value="Under Performed">Under Performed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="section executive-summary">
                 <h2>🎯 Executive Summary - What You Need to Know</h2>
                 <div id="executiveSummary">

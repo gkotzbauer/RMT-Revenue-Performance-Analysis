@@ -10,6 +10,9 @@ export class UIManager {
         this.progressBar = null;
         this.fileInfo = null;
         this.runAnalysisBtn = null;
+        this.weekFilter = null;
+        this.performanceFilter = null;
+        this.currentData = null;
     }
 
     init() {
@@ -23,8 +26,15 @@ export class UIManager {
         this.runAnalysisBtn = document.getElementById('runAnalysisBtn');
         this.progressContainer = document.getElementById('progressContainer');
         
+        // Initialize filters
+        this.weekFilter = document.getElementById('weekFilter');
+        this.performanceFilter = document.getElementById('performanceFilter');
+        
         // Initialize console toggle
         this.initializeConsoleToggle();
+        
+        // Initialize filter event listeners
+        this.initializeFilters();
         
         console.log('✅ UI Manager initialized');
     }
@@ -48,6 +58,48 @@ export class UIManager {
                     '<i class="fas fa-eye-slash"></i> Hide';
             });
         }
+    }
+
+    initializeFilters() {
+        if (this.weekFilter) {
+            this.weekFilter.addEventListener('change', () => this.handleFilterChange());
+        }
+        
+        if (this.performanceFilter) {
+            this.performanceFilter.addEventListener('change', () => this.handleFilterChange());
+        }
+    }
+
+    populateWeekFilter(data) {
+        if (!this.weekFilter || !data) return;
+        
+        // Clear existing options
+        this.weekFilter.innerHTML = '';
+        
+        // Get unique weeks from data
+        const weeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
+        
+        // Add options for each week
+        weeks.forEach(week => {
+            const option = document.createElement('option');
+            option.value = week;
+            option.textContent = week;
+            this.weekFilter.appendChild(option);
+        });
+    }
+
+    handleFilterChange() {
+        const selectedWeeks = Array.from(this.weekFilter.selectedOptions).map(option => option.value);
+        const selectedPerformances = Array.from(this.performanceFilter.selectedOptions).map(option => option.value);
+        
+        // Emit filter change event
+        const event = new CustomEvent('filterChange', {
+            detail: {
+                weeks: selectedWeeks,
+                performances: selectedPerformances
+            }
+        });
+        window.dispatchEvent(event);
     }
 
     showStatus(message, type = 'info') {

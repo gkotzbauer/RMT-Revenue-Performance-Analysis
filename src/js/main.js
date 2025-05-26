@@ -529,6 +529,52 @@ export class HealthcareRevenueApp {
         
         console.log('✅ Application reset complete');
     }
+
+    initializeFilterListener() {
+        window.addEventListener('filterChange', (event) => {
+            const { weeks, performances } = event.detail;
+            this.applyFilters(weeks, performances);
+        });
+    }
+
+    applyFilters(selectedWeeks, selectedPerformances) {
+        if (!this.currentData || !this.analysisResults) return;
+
+        // Filter the data based on selected criteria
+        let filteredData = [...this.currentData];
+        
+        // Apply week filter if weeks are selected
+        if (selectedWeeks.length > 0) {
+            filteredData = filteredData.filter(record => 
+                selectedWeeks.includes(`${record.year}-${record.week}`)
+            );
+        }
+        
+        // Apply performance filter if performances are selected
+        if (selectedPerformances.length > 0) {
+            filteredData = filteredData.filter(record => {
+                const performance = this.analyzer.calculatePerformance(record);
+                return selectedPerformances.includes(performance);
+            });
+        }
+
+        // Update UI with filtered data
+        this.updateUIWithFilteredData(filteredData);
+    }
+
+    updateUIWithFilteredData(filteredData) {
+        // Update metrics
+        const metrics = this.analyzer.calculateMetrics(filteredData);
+        this.uiManager.updateOverviewMetrics(metrics);
+        
+        // Update charts
+        this.uiManager.generateRevenueChart(filteredData);
+        this.uiManager.generatePerformanceChart(filteredData);
+        this.uiManager.generateTrendChart(filteredData);
+        
+        // Update tables
+        this.uiManager.updateDataTable(filteredData);
+    }
 }
 
 // Initialize the application when DOM is loaded
@@ -573,4 +619,6 @@ window.addEventListener('error', (e) => {
         stack: e.error?.stack
     });
 });
+
+export { HealthcareRevenueApp };
 
