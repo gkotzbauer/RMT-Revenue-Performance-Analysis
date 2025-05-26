@@ -568,5 +568,5 @@ window.addEventListener('error', (e) => {
     });
 });
 
-// Export for use in other modules
 export { HealthcareRevenueApp };
+
