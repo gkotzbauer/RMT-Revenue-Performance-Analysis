@@ -107,10 +107,12 @@ export class UIManager {
         // Add event listeners for checkboxes
         weekOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', () => {
-                const selectedWeeks = Array.from(weekOptions.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
-                this.selectedWeeks = new Set(selectedWeeks);
-                this.updateSelectedText(document.querySelector('#weekFilter .select-selected'), selectedWeeks);
+                if (checkbox.checked) {
+                    this.selectedWeeks.add(checkbox.value);
+                } else {
+                    this.selectedWeeks.delete(checkbox.value);
+                }
+                this.updateSelectedText(document.querySelector('#weekFilter .select-selected'), Array.from(this.selectedWeeks));
                 this.handleFilterChange();
             });
         });

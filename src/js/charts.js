@@ -3,6 +3,8 @@
 // Professional charts using Chart.js for data visualization
 // ============================================================================
 
+import { formatCurrency, formatPercentage } from './utils.js';
+
 export class ChartManager {
     constructor() {
         this.charts = {};
