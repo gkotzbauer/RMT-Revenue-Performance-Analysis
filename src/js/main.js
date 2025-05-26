@@ -115,4 +115,6 @@ window.addEventListener('error', (e) => {
         colno: e.colno,
         stack: e.error?.stack
     });
-}); 
+});
+
+export { HealthcareRevenueApp }; 
