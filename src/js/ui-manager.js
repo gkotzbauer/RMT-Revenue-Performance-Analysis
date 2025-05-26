@@ -157,6 +157,13 @@ export class UIManager {
         if (uploadArea) {
             uploadArea.classList.add('file-loaded');
         }
+
+        // Show analysis container
+        const analysisContainer = document.getElementById('analysisContainer');
+        if (analysisContainer) {
+            analysisContainer.classList.add('active');
+            analysisContainer.style.display = 'block';
+        }
     }
 
     enableAnalysisButton() {
@@ -196,6 +203,13 @@ export class UIManager {
         const uploadArea = document.getElementById('uploadArea');
         if (uploadArea) {
             uploadArea.classList.remove('file-loaded');
+        }
+        
+        // Hide analysis container
+        const analysisContainer = document.getElementById('analysisContainer');
+        if (analysisContainer) {
+            analysisContainer.classList.remove('active');
+            analysisContainer.style.display = 'none';
         }
         
         // Disable analysis button
