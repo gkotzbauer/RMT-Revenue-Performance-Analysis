@@ -1,88 +1,29 @@
 services:
   - type: web
-    name: rmt-healthcare-analysis
+    name: rmt-revenue-performance-analysis
     env: node
-    plan: starter
-    region: oregon
-    buildCommand: npm ci && npm run build:production
+    buildCommand: npm install && npm run build:production
     startCommand: npm start
-    healthCheckPath: /health
-    autoDeploy: true
-    preDeployCommand: echo "Pre-deploy hook - build validation"
-    
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: "18"
-      - key: NPM_CONFIG_AUDIT_LEVEL
-        value: moderate
-        
-    scaling:
-      minInstances: 1
-      maxInstances: 3
-      targetMemoryPercent: 80
-      targetCPUPercent: 80
-      
-    # Disk configuration
-    disk:
-      name: rmt-data
-      mountPath: /app/data
-      sizeGB: 1
-      
-    # Headers for security and performance
+      - key: PORT
+        value: 3000
+    healthCheckPath: /health
+    autoDeploy: true
     headers:
-      # Security headers
-      - path: "/*"
-        name: "X-Content-Type-Options"
-        value: "nosniff"
-      - path: "/*"
-        name: "X-Frame-Options"
-        value: "DENY"
-      - path: "/*"
-        name: "X-XSS-Protection"
-        value: "1; mode=block"
-      - path: "/*"
-        name: "Referrer-Policy"
-        value: "strict-origin-when-cross-origin"
-      
-      # JavaScript files
-      - path: "/*.js"
-        name: "Content-Type"
-        value: "application/javascript"
-      - path: "/assets/*.js"
-        name: "Content-Type"
-        value: "application/javascript"
-      
-      # CSS files
-      - path: "/*.css"
-        name: "Content-Type"
-        value: "text/css"
-      - path: "/assets/*.css"
-        name: "Content-Type"
-        value: "text/css"
-      
-      # HTML files
-      - path: "/*.html"
-        name: "Content-Type"
-        value: "text/html"
-      
-      # Cache control for static assets
-      - path: "/assets/*"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
-      - path: "/*.js"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
-      - path: "/*.css"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
-      - path: "/*.png"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
-      - path: "/*.jpg"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
-      - path: "/*.svg"
-        name: "Cache-Control"
-        value: "public, max-age=31536000, immutable"
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: Content-Security-Policy
+        value: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;

@@ -10,8 +10,8 @@
     "start": "node server.js",
     "serve": "npm run build && npm start",
     "dev:server": "nodemon server.js",
-    "build:production": "NODE_ENV=production npm run build",
-    "deploy": "npm run build:production"
+    "build:production": "NODE_ENV=production vite build",
+    "deploy": "npm run build:production && npm start"
   },
   "keywords": [
     "healthcare", "revenue", "analytics", "statistical-analysis", "predictive-modeling"
