@@ -441,7 +441,7 @@ export class HealthcareRevenueApp {
                     <td>${week.Week}</td>
                     <td>${formatCurrency(parseFloat(week['Actual Total Payments']))}</td>
                     <td>${formatCurrency(parseFloat(week['Predicted Total Payments']))}</td>
-                    <td>${formatCurrency(parseFloat(week['Absolute Error']))}</td>
+                    <td>$${(parseFloat(week['Actual Total Payments']) / parseFloat(week['Visit Count'])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td><span class="performance-indicator ${performanceClass}">${week['Performance Diagnostic']}</span></td>
                     <td>${week['Most Influential Performance Factors']}</td>
                 `;
