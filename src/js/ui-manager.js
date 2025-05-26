@@ -13,6 +13,8 @@ export class UIManager {
         this.weekFilter = null;
         this.performanceFilter = null;
         this.currentData = null;
+        this.selectedWeeks = new Set();
+        this.selectedPerformances = new Set();
     }
 
     init() {
@@ -26,17 +28,143 @@ export class UIManager {
         this.runAnalysisBtn = document.getElementById('runAnalysisBtn');
         this.progressContainer = document.getElementById('progressContainer');
         
-        // Initialize filters
-        this.weekFilter = document.getElementById('weekFilter');
-        this.performanceFilter = document.getElementById('performanceFilter');
+        // Initialize custom selects
+        this.initializeCustomSelects();
         
         // Initialize console toggle
         this.initializeConsoleToggle();
         
-        // Initialize filter event listeners
-        this.initializeFilters();
-        
         console.log('✅ UI Manager initialized');
+    }
+
+    initializeCustomSelects() {
+        // Initialize week filter
+        const weekSelect = document.querySelector('.filter-group:first-child .custom-select');
+        if (weekSelect) {
+            const selected = weekSelect.querySelector('.select-selected');
+            const items = weekSelect.querySelector('.select-items');
+            const searchInput = weekSelect.querySelector('.select-search-input');
+            
+            selected.addEventListener('click', () => {
+                items.classList.toggle('select-hide');
+                if (!items.classList.contains('select-hide')) {
+                    searchInput?.focus();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!weekSelect.contains(e.target)) {
+                    items.classList.add('select-hide');
+                }
+            });
+
+            // Handle search
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const options = weekSelect.querySelectorAll('.select-option');
+                    options.forEach(option => {
+                        const text = option.textContent.toLowerCase();
+                        option.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        // Initialize performance filter
+        const performanceSelect = document.querySelector('.filter-group:last-child .custom-select');
+        if (performanceSelect) {
+            const selected = performanceSelect.querySelector('.select-selected');
+            const items = performanceSelect.querySelector('.select-items');
+            
+            selected.addEventListener('click', () => {
+                items.classList.toggle('select-hide');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!performanceSelect.contains(e.target)) {
+                    items.classList.add('select-hide');
+                }
+            });
+
+            // Handle checkbox changes
+            const checkboxes = performanceSelect.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        this.selectedPerformances.add(checkbox.value);
+                    } else {
+                        this.selectedPerformances.delete(checkbox.value);
+                    }
+                    this.updateSelectedText(selected, Array.from(this.selectedPerformances));
+                    this.handleFilterChange();
+                });
+            });
+        }
+    }
+
+    populateWeekFilter(data) {
+        if (!data || !Array.isArray(data)) return;
+        
+        // Get unique weeks from the data
+        const uniqueWeeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
+        
+        // Get the options container
+        const optionsContainer = document.querySelector('.filter-group:first-child .select-options');
+        if (!optionsContainer) return;
+        
+        // Clear existing options
+        optionsContainer.innerHTML = '';
+        
+        // Add new options
+        uniqueWeeks.forEach(week => {
+            const option = document.createElement('div');
+            option.className = 'select-option';
+            option.innerHTML = `
+                <input type="checkbox" id="week-${week}" value="${week}">
+                <label for="week-${week}">${week}</label>
+            `;
+            
+            // Add change event listener
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    this.selectedWeeks.add(week);
+                } else {
+                    this.selectedWeeks.delete(week);
+                }
+                this.updateSelectedText(
+                    document.querySelector('.filter-group:first-child .select-selected'),
+                    Array.from(this.selectedWeeks)
+                );
+                this.handleFilterChange();
+            });
+            
+            optionsContainer.appendChild(option);
+        });
+    }
+
+    updateSelectedText(element, selectedValues) {
+        if (selectedValues.length === 0) {
+            element.textContent = element.dataset.placeholder || 'Select...';
+            element.classList.remove('selected');
+        } else {
+            element.textContent = selectedValues.join(', ');
+            element.classList.add('selected');
+        }
+    }
+
+    handleFilterChange() {
+        // Emit filter change event
+        const event = new CustomEvent('filterChange', {
+            detail: {
+                weeks: Array.from(this.selectedWeeks),
+                performances: Array.from(this.selectedPerformances)
+            }
+        });
+        window.dispatchEvent(event);
     }
 
     initializeConsoleToggle() {
@@ -58,48 +186,6 @@ export class UIManager {
                     '<i class="fas fa-eye-slash"></i> Hide';
             });
         }
-    }
-
-    initializeFilters() {
-        if (this.weekFilter) {
-            this.weekFilter.addEventListener('change', () => this.handleFilterChange());
-        }
-        
-        if (this.performanceFilter) {
-            this.performanceFilter.addEventListener('change', () => this.handleFilterChange());
-        }
-    }
-
-    populateWeekFilter(data) {
-        if (!data || !Array.isArray(data)) return;
-        
-        // Get unique weeks from the data
-        const uniqueWeeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
-        
-        // Clear existing options
-        this.weekFilter.innerHTML = '';
-        
-        // Add new options
-        uniqueWeeks.forEach(week => {
-            const option = document.createElement('option');
-            option.value = week;
-            option.textContent = week;
-            this.weekFilter.appendChild(option);
-        });
-    }
-
-    handleFilterChange() {
-        const selectedWeeks = Array.from(this.weekFilter.selectedOptions).map(option => option.value);
-        const selectedPerformances = Array.from(this.performanceFilter.selectedOptions).map(option => option.value);
-        
-        // Emit filter change event
-        const event = new CustomEvent('filterChange', {
-            detail: {
-                weeks: selectedWeeks,
-                performances: selectedPerformances
-            }
-        });
-        window.dispatchEvent(event);
     }
 
     showStatus(message, type = 'info') {

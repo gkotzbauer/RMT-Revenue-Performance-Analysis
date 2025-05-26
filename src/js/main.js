@@ -454,6 +454,7 @@ export class HealthcareRevenueApp {
                 row.innerHTML = `
                     <td>${week.Year}</td>
                     <td>${week.Week}</td>
+                    <td>$${(parseFloat(week['Actual Total Payments']) / parseFloat(week['Visit Count'])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td>$${parseFloat(week['Actual Total Payments']).toLocaleString()}</td>
                     <td>$${parseFloat(week['Predicted Total Payments']).toLocaleString()}</td>
                     <td>$${parseFloat(week['Absolute Error']).toLocaleString()}</td>
@@ -619,4 +620,6 @@ window.addEventListener('error', (e) => {
         stack: e.error?.stack
     });
 });
+
+export { HealthcareRevenueApp };
 

@@ -98,7 +98,8 @@ export class ChartManager {
                                 const value = new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD',
-                                    minimumFractionDigits: 0
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
                                 }).format(context.parsed.y);
                                 return `${context.dataset.label}: ${value}`;
                             }
@@ -126,6 +127,7 @@ export class ChartManager {
                                     style: 'currency',
                                     currency: 'USD',
                                     minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
                                     notation: 'compact'
                                 }).format(value);
                             }
@@ -220,12 +222,14 @@ export class ChartManager {
                                 const actual = new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD',
-                                    minimumFractionDigits: 0
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
                                 }).format(point.x);
                                 const predicted = new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD',
-                                    minimumFractionDigits: 0
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
                                 }).format(point.y);
                                 return [
                                     `Actual: ${actual}`,
@@ -248,6 +252,7 @@ export class ChartManager {
                                     style: 'currency',
                                     currency: 'USD',
                                     minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
                                     notation: 'compact'
                                 }).format(value);
                             }
@@ -264,6 +269,7 @@ export class ChartManager {
                                     style: 'currency',
                                     currency: 'USD',
                                     minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
                                     notation: 'compact'
                                 }).format(value);
                             }
@@ -324,7 +330,8 @@ export class ChartManager {
                                 const value = new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD',
-                                    minimumFractionDigits: 0
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
                                 }).format(context.parsed.y);
                                 return `${context.dataset.label}: ${value}`;
                             }
@@ -352,6 +359,7 @@ export class ChartManager {
                                     style: 'currency',
                                     currency: 'USD',
                                     minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
                                     notation: 'compact'
                                 }).format(value);
                             }
@@ -424,7 +432,8 @@ export class ChartManager {
                                 const value = new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD',
-                                    minimumFractionDigits: 0
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
                                 }).format(context.parsed);
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context.parsed / total) * 100).toFixed(1);

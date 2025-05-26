@@ -347,9 +347,9 @@ export class ExportManager {
             overPerformed: distribution['Over Performed'] || 0,
             averagePerformed: distribution['Average Performance'] || 0,
             underPerformed: distribution['Under Performed'] || 0,
-            overPerformedPct: ((distribution['Over Performed'] || 0) / total * 100).toFixed(1),
-            averagePerformedPct: ((distribution['Average Performance'] || 0) / total * 100).toFixed(1),
-            underPerformedPct: ((distribution['Under Performed'] || 0) / total * 100).toFixed(1)
+            overPerformedPct: Math.round((distribution['Over Performed'] || 0) / total * 100),
+            averagePerformedPct: Math.round((distribution['Average Performance'] || 0) / total * 100),
+            underPerformedPct: Math.round((distribution['Under Performed'] || 0) / total * 100)
         };
     }
 

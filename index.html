@@ -438,17 +438,39 @@
                 <div class="filter-grid">
                     <div class="filter-group">
                         <label for="weekFilter">Week(s)</label>
-                        <select id="weekFilter" multiple class="filter-select">
-                            <!-- Weeks will be populated by JavaScript -->
-                        </select>
+                        <div class="custom-select">
+                            <div class="select-selected">Select Week(s)</div>
+                            <div class="select-items select-hide">
+                                <div class="select-search">
+                                    <input type="text" placeholder="Search weeks..." class="select-search-input">
+                                </div>
+                                <div class="select-options">
+                                    <!-- Weeks will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="filter-group">
                         <label for="performanceFilter">Performance</label>
-                        <select id="performanceFilter" multiple class="filter-select">
-                            <option value="Over Performed">Over Performed</option>
-                            <option value="Average Performance">Average Performance</option>
-                            <option value="Under Performed">Under Performed</option>
-                        </select>
+                        <div class="custom-select">
+                            <div class="select-selected">Select Performance</div>
+                            <div class="select-items select-hide">
+                                <div class="select-options">
+                                    <div class="select-option">
+                                        <input type="checkbox" id="overPerformed" value="Over Performed">
+                                        <label for="overPerformed">Over Performed</label>
+                                    </div>
+                                    <div class="select-option">
+                                        <input type="checkbox" id="averagePerformance" value="Average Performance">
+                                        <label for="averagePerformance">Average Performance</label>
+                                    </div>
+                                    <div class="select-option">
+                                        <input type="checkbox" id="underPerformed" value="Under Performed">
+                                        <label for="underPerformed">Under Performed</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -515,7 +537,7 @@
                                 <th>Week</th>
                                 <th>Actual Total Payments</th>
                                 <th>Predicted Total Payments</th>
-                                <th>Absolute Error</th>
+                                <th>Avg. Payment Per Visit</th>
                                 <th>Performance</th>
                                 <th>Most Influential Performance Factors</th>
                             </tr>
