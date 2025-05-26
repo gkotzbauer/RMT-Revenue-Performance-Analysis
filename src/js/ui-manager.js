@@ -105,44 +105,30 @@ export class UIManager {
         }
     }
 
-    populateWeekFilter(data) {
-        if (!data || !Array.isArray(data)) return;
-        
-        // Get unique weeks from the data
-        const uniqueWeeks = [...new Set(data.map(record => `${record.year}-${record.week}`))].sort();
-        
-        // Get the options container
-        const optionsContainer = document.querySelector('.filter-group:first-child .select-options');
-        if (!optionsContainer) return;
-        
-        // Clear existing options
-        optionsContainer.innerHTML = '';
-        
-        // Add new options
-        uniqueWeeks.forEach(week => {
+    populateWeekFilter(weeks) {
+        const weekOptions = document.querySelector('#weekFilter .select-options');
+        if (!weekOptions) return;
+
+        weekOptions.innerHTML = '';
+        weeks.forEach(week => {
             const option = document.createElement('div');
             option.className = 'select-option';
             option.innerHTML = `
-                <input type="checkbox" id="week-${week}" value="${week}">
-                <label for="week-${week}">${week}</label>
+                <input type="checkbox" id="week_${week}" value="${week}">
+                <label for="week_${week}">${week}</label>
             `;
-            
-            // Add change event listener
-            const checkbox = option.querySelector('input[type="checkbox"]');
+            weekOptions.appendChild(option);
+        });
+
+        // Add event listeners for checkboxes
+        weekOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', () => {
-                if (checkbox.checked) {
-                    this.selectedWeeks.add(week);
-                } else {
-                    this.selectedWeeks.delete(week);
-                }
-                this.updateSelectedText(
-                    document.querySelector('.filter-group:first-child .select-selected'),
-                    Array.from(this.selectedWeeks)
-                );
+                const selectedWeeks = Array.from(weekOptions.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                this.selectedWeeks = new Set(selectedWeeks);
+                this.updateSelectedText();
                 this.handleFilterChange();
             });
-            
-            optionsContainer.appendChild(option);
         });
     }
 

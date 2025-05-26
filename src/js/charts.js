@@ -47,7 +47,8 @@ export class ChartManager {
         }
 
         const ctx = canvas.getContext('2d');
-        const data = results.finalResults.slice(0, 20); // Show first 20 weeks
+        // Get last 6 months of data (approximately 26 weeks)
+        const data = results.finalResults.slice(-26);
 
         this.charts.overview = new Chart(ctx, {
             type: 'line',
@@ -295,7 +296,8 @@ export class ChartManager {
         }
 
         const ctx = canvas.getContext('2d');
-        const data = results.finalResults.slice(0, 24); // Show first 24 weeks
+        // Get last 6 months of data (approximately 26 weeks)
+        const data = results.finalResults.slice(-26);
 
         this.charts.trends = new Chart(ctx, {
             type: 'line',
