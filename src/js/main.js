@@ -316,8 +316,8 @@ export class HealthcareRevenueApp {
     }
 
     displayResults(results) {
-        console.log('🪵 Analysis results object:', results);
         console.log('📊 Displaying analysis results...');
+        console.log('🪵 Analysis results object:', results);
 
         // Update overview metrics
         this.updateOverviewMetrics(results);
