@@ -36,341 +36,169 @@ export class ChartManager {
     }
 
     generateOverviewChart(results) {
-        console.log('📈 Generating overview chart...');
-        
-        const canvas = document.getElementById('overviewChart');
-        if (!canvas) return;
+        const ctx = document.getElementById('overviewChart');
+        if (!ctx) return;
 
-        // Destroy existing chart
-        if (this.charts.overview) {
-            this.charts.overview.destroy();
-        }
-
-        const ctx = canvas.getContext('2d');
-        // Get last 6 months of data (approximately 26 weeks)
+        // Get the last 6 months of data (approximately 26 weeks)
         const data = results.finalResults.slice(-26);
 
-        this.charts.overview = new Chart(ctx, {
+        const chartData = {
+            labels: data.map(d => `${d.year}-${d.week}`),
+            datasets: [
+                {
+                    label: 'Actual Revenue',
+                    data: data.map(d => d.actualTotalPayments),
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true
+                },
+                {
+                    label: 'Predicted Revenue',
+                    data: data.map(d => d.predictedTotalPayments),
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    fill: true
+                }
+            ]
+        };
+
+        const config = {
             type: 'line',
-            data: {
-                labels: data.map(week => `${week.Year}-${week.Week}`),
-                datasets: [
-                    {
-                        label: 'Actual Revenue',
-                        data: data.map(week => parseFloat(week['Actual Total Payments'])),
-                        borderColor: this.colors.primary,
-                        backgroundColor: this.colors.primary + '20',
-                        borderWidth: 3,
-                        fill: false,
-                        pointBackgroundColor: this.colors.primary,
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2
-                    },
-                    {
-                        label: 'Predicted Revenue',
-                        data: data.map(week => parseFloat(week['Predicted Total Payments'])),
-                        borderColor: this.colors.secondary,
-                        backgroundColor: this.colors.secondary + '20',
-                        borderWidth: 2,
-                        fill: false,
-                        borderDash: [5, 5],
-                        pointBackgroundColor: this.colors.secondary,
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2
-                    }
-                ]
-            },
+            data: chartData,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     title: {
-                        display: false
-                    },
-                    legend: {
-                        position: 'top',
-                        align: 'end'
+                        display: true,
+                        text: 'Revenue Overview (Last 6 Months)'
                     },
                     tooltip: {
-                        mode: 'index',
-                        intersect: false,
                         callbacks: {
                             label: (context) => {
-                                const value = new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }).format(context.parsed.y);
-                                return `${context.dataset.label}: ${value}`;
+                                return `${context.dataset.label}: ${this.formatCurrency(context.raw)}`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Week'
-                        },
-                        grid: {
-                            display: false
-                        }
-                    },
                     y: {
-                        title: {
-                            display: true,
-                            text: 'Revenue ($)'
-                        },
+                        beginAtZero: true,
                         ticks: {
-                            callback: (value) => {
-                                return new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0,
-                                    notation: 'compact'
-                                }).format(value);
-                            }
+                            callback: (value) => this.formatCurrency(value)
                         }
                     }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
                 }
             }
-        });
+        };
+
+        new Chart(ctx, config);
     }
 
     generatePerformanceChart(results) {
-        console.log('📊 Generating performance chart...');
-        
-        const canvas = document.getElementById('performanceChart');
-        if (!canvas) return;
+        const ctx = document.getElementById('performanceChart');
+        if (!ctx) return;
 
-        // Destroy existing chart
-        if (this.charts.performance) {
-            this.charts.performance.destroy();
-        }
-
-        const ctx = canvas.getContext('2d');
-        // Get last 6 months of data (approximately 26 weeks)
+        // Get the last 6 months of data (approximately 26 weeks)
         const data = results.performanceResults.slice(-26);
 
-        // Create scatter plot data
-        const scatterData = data.map(week => ({
-            x: week.actualPayments,
-            y: week.predictedPayments,
-            performance: week.performanceDiagnostic,
-            week: `${week.year}-${week.week}`
-        }));
+        const chartData = {
+            labels: data.map(d => `${d.year}-${d.week}`),
+            datasets: [
+                {
+                    label: 'Performance',
+                    data: data.map(d => d.performance),
+                    borderColor: '#FF9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    fill: true
+                }
+            ]
+        };
 
-        // Separate by performance category
-        const overPerformed = scatterData.filter(d => d.performance === 'Over Performed');
-        const underPerformed = scatterData.filter(d => d.performance === 'Under Performed');
-        const averagePerformed = scatterData.filter(d => d.performance === 'Average Performance');
-
-        this.charts.performance = new Chart(ctx, {
-            type: 'scatter',
-            data: {
-                datasets: [
-                    {
-                        label: 'Over Performed',
-                        data: overPerformed,
-                        backgroundColor: this.colors.success + '80',
-                        borderColor: this.colors.success,
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    },
-                    {
-                        label: 'Average Performance',
-                        data: averagePerformed,
-                        backgroundColor: this.colors.warning + '80',
-                        borderColor: this.colors.warning,
-                        borderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
-                    },
-                    {
-                        label: 'Under Performed',
-                        data: underPerformed,
-                        backgroundColor: this.colors.error + '80',
-                        borderColor: this.colors.error,
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    }
-                ]
-            },
+        const config = {
+            type: 'line',
+            data: chartData,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end'
+                    title: {
+                        display: true,
+                        text: 'Performance Trend (Last 6 Months)'
                     },
                     tooltip: {
                         callbacks: {
-                            title: (context) => {
-                                const point = context[0].raw;
-                                return `Week: ${point.week}`;
-                            },
                             label: (context) => {
-                                const point = context.raw;
-                                const actual = new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }).format(point.x);
-                                const predicted = new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }).format(point.y);
-                                return [
-                                    `Actual: ${actual}`,
-                                    `Predicted: ${predicted}`,
-                                    `Status: ${point.performance}`
-                                ];
+                                return `Performance: ${this.formatPercentage(context.raw / 100)}`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Actual Revenue ($)'
-                        },
-                        ticks: {
-                            callback: (value) => {
-                                return new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0,
-                                    notation: 'compact'
-                                }).format(value);
-                            }
-                        }
-                    },
                     y: {
-                        title: {
-                            display: true,
-                            text: 'Predicted Revenue ($)'
-                        },
+                        beginAtZero: true,
                         ticks: {
-                            callback: (value) => {
-                                return new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0,
-                                    notation: 'compact'
-                                }).format(value);
-                            }
+                            callback: (value) => this.formatPercentage(value / 100)
                         }
                     }
                 }
             }
-        });
+        };
 
-        // Add perfect prediction line
-        this.addPerfectPredictionLine(this.charts.performance);
+        new Chart(ctx, config);
     }
 
     generateTrendsChart(results) {
-        console.log('📈 Generating trends chart...');
-        
-        const canvas = document.getElementById('trendsChart');
-        if (!canvas) return;
+        const ctx = document.getElementById('trendsChart');
+        if (!ctx) return;
 
-        // Destroy existing chart
-        if (this.charts.trends) {
-            this.charts.trends.destroy();
-        }
-
-        const ctx = canvas.getContext('2d');
-        // Get last 6 months of data (approximately 26 weeks)
+        // Get the last 6 months of data (approximately 26 weeks)
         const data = results.finalResults.slice(-26);
 
-        this.charts.trends = new Chart(ctx, {
+        const chartData = {
+            labels: data.map(d => `${d.year}-${d.week}`),
+            datasets: [
+                {
+                    label: 'Total Revenue',
+                    data: data.map(d => d.actualTotalPayments),
+                    borderColor: '#9C27B0',
+                    backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                    fill: true
+                }
+            ]
+        };
+
+        const config = {
             type: 'line',
-            data: {
-                labels: data.map(week => `${week.Year}-${week.Week}`),
-                datasets: [
-                    {
-                        label: 'Total Revenue',
-                        data: data.map(week => parseFloat(week['Actual Total Payments'])),
-                        borderColor: this.colors.primary,
-                        backgroundColor: this.colors.primary + '20',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.1,
-                        yAxisID: 'y'
-                    }
-                ]
-            },
+            data: chartData,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end'
+                    title: {
+                        display: true,
+                        text: 'Revenue Trends (Last 6 Months)'
                     },
                     tooltip: {
-                        mode: 'index',
-                        intersect: false,
                         callbacks: {
                             label: (context) => {
-                                const value = new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                }).format(context.parsed.y);
-                                return `${context.dataset.label}: ${value}`;
+                                return `Total Revenue: ${this.formatCurrency(context.raw)}`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time Period'
-                        },
-                        grid: {
-                            display: false
-                        }
-                    },
                     y: {
-                        title: {
-                            display: true,
-                            text: 'Revenue ($)'
-                        },
+                        beginAtZero: true,
                         ticks: {
-                            callback: (value) => {
-                                return new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0,
-                                    notation: 'compact'
-                                }).format(value);
-                            }
+                            callback: (value) => this.formatCurrency(value)
                         }
                     }
                 }
             }
-        });
+        };
+
+        new Chart(ctx, config);
     }
 
     generatePayerChart(results) {

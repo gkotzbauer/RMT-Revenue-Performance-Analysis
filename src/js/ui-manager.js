@@ -43,13 +43,9 @@ export class UIManager {
         if (weekSelect) {
             const selected = weekSelect.querySelector('.select-selected');
             const items = weekSelect.querySelector('.select-items');
-            const searchInput = weekSelect.querySelector('.select-search-input');
             
             selected.addEventListener('click', () => {
                 items.classList.toggle('select-hide');
-                if (!items.classList.contains('select-hide')) {
-                    searchInput?.focus();
-                }
             });
 
             // Close dropdown when clicking outside
@@ -58,18 +54,6 @@ export class UIManager {
                     items.classList.add('select-hide');
                 }
             });
-
-            // Handle search
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const options = weekSelect.querySelectorAll('.select-option');
-                    options.forEach(option => {
-                        const text = option.textContent.toLowerCase();
-                        option.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
-            }
         }
 
         // Initialize performance filter
@@ -114,7 +98,7 @@ export class UIManager {
             const option = document.createElement('div');
             option.className = 'select-option';
             option.innerHTML = `
-                <input type="checkbox" id="week_${week}" value="${week}">
+                <input type="checkbox" id="week_${week}" value="${week}" checked>
                 <label for="week_${week}">${week}</label>
             `;
             weekOptions.appendChild(option);
@@ -126,10 +110,14 @@ export class UIManager {
                 const selectedWeeks = Array.from(weekOptions.querySelectorAll('input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
                 this.selectedWeeks = new Set(selectedWeeks);
-                this.updateSelectedText();
+                this.updateSelectedText(document.querySelector('#weekFilter .select-selected'), selectedWeeks);
                 this.handleFilterChange();
             });
         });
+
+        // Initialize with all weeks selected
+        this.selectedWeeks = new Set(weeks);
+        this.updateSelectedText(document.querySelector('#weekFilter .select-selected'), weeks);
     }
 
     updateSelectedText(element, selectedValues) {
@@ -511,4 +499,4 @@ export class UIManager {
 document.addEventListener('DOMContentLoaded', () => {
     const uiManager = new UIManager();
     uiManager.initializeResponsive?.();
-});
+}); 
