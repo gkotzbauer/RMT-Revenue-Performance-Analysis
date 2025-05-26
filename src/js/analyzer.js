@@ -561,4 +561,16 @@ export class HealthcareAnalyzer {
     calculateMean(array) {
         return this.mean(array);
     }
+
+    calculatePerformance(actualPayments, predictedPayments) {
+        const percentageDiff = ((actualPayments - predictedPayments) / predictedPayments) * 100;
+        
+        if (percentageDiff > 2.5) {
+            return 'Over Performed';
+        } else if (percentageDiff < -2.5) {
+            return 'Under Performed';
+        } else {
+            return 'Average Performance';
+        }
+    }
 }
