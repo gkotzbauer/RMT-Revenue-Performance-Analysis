@@ -90,7 +90,7 @@ export class UIManager {
     }
 
     populateWeekFilter(weeks) {
-        const weekOptions = document.querySelector('#weekFilter .select-items');
+        const weekOptions = document.querySelector('#weekFilter .select-options');
         if (!weekOptions) return;
 
         weekOptions.innerHTML = '';
