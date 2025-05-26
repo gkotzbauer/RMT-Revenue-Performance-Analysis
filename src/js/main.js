@@ -620,5 +620,4 @@ window.addEventListener('error', (e) => {
         stack: e.error?.stack
     });
 });
-export { HealthcareRevenueApp };
 
