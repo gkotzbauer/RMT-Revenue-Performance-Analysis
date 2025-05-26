@@ -8,7 +8,7 @@ import { UIManager } from './ui-manager.js';
 import { ChartManager } from './charts.js';
 import { ExportManager } from './export.js';
 
-class HealthcareRevenueApp {
+export class HealthcareRevenueApp {
     constructor() {
         this.analyzer = new HealthcareAnalyzer();
         this.uiManager = new UIManager();
