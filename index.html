@@ -415,18 +415,22 @@
         <div class="header">
             <h1>Healthcare Revenue Performance Analyzer</h1>
             <p>Professional-grade analytics for clinic revenue optimization</p>
-            <div class="upload-section" id="uploadSection">
-                <div class="upload-text">📊 Upload Your Weekly Performance Data</div>
-                <div class="upload-subtitle">Drag & drop your Excel file here or click to browse</div>
-                <input type="file" id="fileInput" accept=".xlsx,.xls" />
-            </div>
         </div>
 
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadArea">
+            <div class="upload-text">📊 Upload Your Weekly Performance Data</div>
+            <div class="upload-subtitle">Drag & drop your Excel file here or click to browse</div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" />
+        </div>
+
+        <!-- Loading Section -->
         <div class="loading" id="loadingSection">
             <div class="loading-spinner"></div>
             <div>Analyzing your revenue data...</div>
         </div>
 
+        <!-- Analysis Container -->
         <div class="analysis-container" id="analysisContainer">
             <div class="section executive-summary">
                 <h2>🎯 Executive Summary - What You Need to Know</h2>
@@ -463,7 +467,20 @@
                 <h2>📋 Weekly Performance Details</h2>
                 <div class="table-container">
                     <table class="data-table" id="detailsTable">
-                        <!-- Table will be populated by JavaScript -->
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Week</th>
+                                <th>Payer</th>
+                                <th>EM Group</th>
+                                <th>Total Payments</th>
+                                <th>Visit Count</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- Table data will be populated by JavaScript -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -484,13 +501,16 @@
                 <h2>📄 Export Your Analysis</h2>
                 <p>Download complete results and individual charts for your team</p>
                 <div class="export-buttons">
-                    <button class="export-btn" id="exportExcel">📊 Complete Excel Report</button>
-                    <button class="export-btn" id="exportPerformanceChart">📈 Performance Chart</button>
-                    <button class="export-btn" id="exportTrendChart">📉 Trend Analysis</button>
-                    <button class="export-btn" id="exportTable">📋 Data Table</button>
+                    <button class="export-btn" id="exportCsvBtn">📊 CSV Export</button>
+                    <button class="export-btn" id="exportPdfBtn">📄 PDF Export</button>
+                    <button class="export-btn" id="runAnalysisBtn">🚀 Run Analysis</button>
+                    <button class="export-btn" id="resetBtn">🔄 Reset</button>
                 </div>
             </div>
         </div>
+
+        <!-- Status Container -->
+        <div id="statusContainer" class="status-container"></div>
     </div>
 
     <!-- External Libraries -->
