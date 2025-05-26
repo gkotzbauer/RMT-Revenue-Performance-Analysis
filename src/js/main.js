@@ -621,5 +621,4 @@ window.addEventListener('error', (e) => {
     });
 });
 
-export { HealthcareRevenueApp };
 
