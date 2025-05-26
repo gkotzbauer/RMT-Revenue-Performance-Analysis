@@ -9,7 +9,9 @@ export default defineConfig({
     sourcemap: true,
     minify: 'terser',
     rollupOptions: {
-      input: { main: resolve(__dirname, 'index.html') },
+      input: {
+        main: resolve(__dirname, 'index.html')
+      },
       output: {
         manualChunks: {
           vendor: ['lodash', 'xlsx', 'chart.js']
