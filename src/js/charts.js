@@ -156,7 +156,8 @@ export class ChartManager {
         }
 
         const ctx = canvas.getContext('2d');
-        const data = results.performanceResults;
+        // Get last 6 months of data (approximately 26 weeks)
+        const data = results.performanceResults.slice(-26);
 
         // Create scatter plot data
         const scatterData = data.map(week => ({
