@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/RMT-Revenue-Performance-Analysis/' : '/',
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -13,7 +13,17 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['lodash', 'xlsx', 'chart.js']
-        }
+        },
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/\.(css)$/.test(assetInfo.name)) {
+            return `assets/[name]-[hash].css`;
+          }
+          return `assets/[name]-[hash].${ext}`;
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
       }
     }
   },
