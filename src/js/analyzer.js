@@ -503,48 +503,92 @@ export class HealthcareAnalyzer {
             bcbsAnalysis: []
         };
 
-        // Analyze positive factors
-        if (weekResult.performanceDiagnostic === 'Over Performed') {
-            if (week.totalVisitCount > benchmarks.avgTotalVisits * 1.1) {
-                analysis.whatWentWell.push(`High visit volume of ${week.totalVisitCount} visits`);
-            }
-            if (week.totalChargeAmount > benchmarks.avgTotalCharges * 1.1) {
-                analysis.whatWentWell.push(`Strong charge capture of $${week.totalChargeAmount.toFixed(0)}`);
-            }
-            if (week.weightedAvgCollectionPct > benchmarks.avgCollectionPct * 1.1) {
-                analysis.whatWentWell.push(`Excellent collection rate of ${(week.weightedAvgCollectionPct * 100).toFixed(1)}%`);
-            }
-        }
+        // Get all variables for the week
+        const weekVariables = [];
+        week.detailRecords.forEach(record => {
+            weekVariables.push({
+                payer: record.payer,
+                chargeAmount: record.chargeAmount,
+                avgPayment: record.avgPayment,
+                avgEMWeight: record.avgEMWeight,
+                collectionPct: record.collectionPct,
+                totalPayments: record.totalPayments,
+                visitCount: record.visitCount,
+                visitsWithLabCount: record.visitsWithLabCount
+            });
+        });
 
-        // Analyze improvement opportunities
-        if (weekResult.performanceDiagnostic === 'Under Performed') {
-            if (week.totalVisitCount < benchmarks.avgTotalVisits * 0.9) {
-                analysis.whatCouldBeImproved.push(`Low visit volume of ${week.totalVisitCount} visits`);
+        // Calculate averages for all variables across all weeks
+        const allWeeksData = this.weeklyData.flatMap(w => w.detailRecords);
+        const averages = {};
+        allWeeksData.forEach(record => {
+            if (!averages[record.payer]) {
+                averages[record.payer] = {
+                    chargeAmount: [],
+                    avgPayment: [],
+                    avgEMWeight: [],
+                    collectionPct: [],
+                    totalPayments: [],
+                    visitCount: [],
+                    visitsWithLabCount: []
+                };
             }
-            if (week.weightedAvgCollectionPct < benchmarks.avgCollectionPct * 0.9) {
-                analysis.whatCouldBeImproved.push(`Collection rate of ${(week.weightedAvgCollectionPct * 100).toFixed(1)}% below average`);
-            }
-        }
+            Object.keys(averages[record.payer]).forEach(key => {
+                averages[record.payer][key].push(record[key]);
+            });
+        });
 
-        // BCBS Analysis
-        const bcbsChargesPct = week.bcbsCharges / week.totalChargeAmount;
-        if (bcbsChargesPct > benchmarks.avgBCBSPct * 1.2) {
-            analysis.bcbsAnalysis.push(`Strong BCBS presence at ${(bcbsChargesPct * 100).toFixed(1)}% of charges`);
-        } else if (bcbsChargesPct < benchmarks.avgBCBSPct * 0.8) {
-            analysis.bcbsAnalysis.push(`BCBS underrepresented at ${(bcbsChargesPct * 100).toFixed(1)}% of charges`);
-        } else {
-            analysis.bcbsAnalysis.push(`BCBS representation normal at ${(bcbsChargesPct * 100).toFixed(1)}% of charges`);
-        }
+        // Calculate mean for each variable
+        Object.keys(averages).forEach(payer => {
+            Object.keys(averages[payer]).forEach(key => {
+                averages[payer][key] = this.mean(averages[payer][key]);
+            });
+        });
 
-        // Aetna Analysis
-        const aetnaChargesPct = week.aetnaCharges / week.totalChargeAmount;
-        if (aetnaChargesPct > benchmarks.avgAetnaPct * 1.2) {
-            analysis.aetnaAnalysis.push(`Strong Aetna presence at ${(aetnaChargesPct * 100).toFixed(1)}% of charges`);
-        } else if (aetnaChargesPct < benchmarks.avgAetnaPct * 0.8) {
-            analysis.aetnaAnalysis.push(`Aetna underrepresented at ${(aetnaChargesPct * 100).toFixed(1)}% of charges`);
-        } else {
-            analysis.aetnaAnalysis.push(`Aetna representation normal at ${(aetnaChargesPct * 100).toFixed(1)}% of charges`);
-        }
+        // Find best and worst performing variables
+        const performanceMetrics = [];
+        weekVariables.forEach(variable => {
+            const payer = variable.payer;
+            Object.keys(variable).forEach(key => {
+                if (key !== 'payer' && averages[payer] && averages[payer][key]) {
+                    const currentValue = variable[key];
+                    const avgValue = averages[payer][key];
+                    const percentDiff = ((currentValue - avgValue) / avgValue) * 100;
+                    
+                    performanceMetrics.push({
+                        payer,
+                        metric: key,
+                        currentValue,
+                        avgValue,
+                        percentDiff,
+                        description: `The ${payer} - ${key.replace(/([A-Z])/g, ' $1').trim()} is ${currentValue.toFixed(2)}, while its overall average is ${avgValue.toFixed(2)}.`
+                    });
+                }
+            });
+        });
+
+        // Sort by performance difference
+        performanceMetrics.sort((a, b) => b.percentDiff - a.percentDiff);
+
+        // Get top 2 best and worst performing variables
+        const bestPerformers = performanceMetrics.slice(0, 2);
+        const worstPerformers = performanceMetrics.slice(-2).reverse();
+
+        // Update what went well
+        analysis.whatWentWell = bestPerformers.map(metric => metric.description);
+
+        // Update what could be improved
+        analysis.whatCouldBeImproved = worstPerformers.map(metric => metric.description);
+
+        // Filter and analyze Aetna-specific metrics
+        const aetnaMetrics = performanceMetrics.filter(m => m.payer.includes('AETNA'));
+        aetnaMetrics.sort((a, b) => Math.abs(b.percentDiff) - Math.abs(a.percentDiff));
+        analysis.aetnaAnalysis = aetnaMetrics.slice(0, 2).map(metric => metric.description);
+
+        // Filter and analyze BCBS-specific metrics
+        const bcbsMetrics = performanceMetrics.filter(m => m.payer.includes('BCBS'));
+        bcbsMetrics.sort((a, b) => Math.abs(b.percentDiff) - Math.abs(a.percentDiff));
+        analysis.bcbsAnalysis = bcbsMetrics.slice(0, 2).map(metric => metric.description);
 
         return analysis;
     }
