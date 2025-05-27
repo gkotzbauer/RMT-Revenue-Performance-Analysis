@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig({
   base: '/',
@@ -14,7 +15,8 @@ export default defineConfig({
       },
       output: {
         manualChunks: {
-          vendor: ['lodash', 'xlsx', 'chart.js']
+          vendor: ['lodash', 'xlsx', 'chart.js'],
+          utils: ['date-fns', 'papaparse']
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
@@ -35,7 +37,10 @@ export default defineConfig({
     cors: true,
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff'
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self';"
     }
   },
   assetsInclude: ['**/*.xlsx', '**/*.xls'],
@@ -46,15 +51,20 @@ export default defineConfig({
     } 
   },
   optimizeDeps: { 
-    include: ['lodash', 'xlsx', 'chart.js'],
+    include: ['lodash', 'xlsx', 'chart.js', 'date-fns', 'papaparse'],
     exclude: []
   },
   plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11']
+    }),
     {
       name: 'configure-response-headers',
       configureServer: (server) => {
         server.middlewares.use((_req, res, next) => {
           res.setHeader('X-Content-Type-Options', 'nosniff');
+          res.setHeader('X-Frame-Options', 'DENY');
+          res.setHeader('X-XSS-Protection', '1; mode=block');
           next();
         });
       }

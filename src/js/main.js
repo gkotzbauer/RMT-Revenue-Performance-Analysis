@@ -39,6 +39,11 @@ export class HealthcareRevenueApp {
             throw new Error('Chart.js library is not loaded. Please ensure it is loaded before the application script.');
         }
         
+        // Verify DOM is ready
+        if (document.readyState !== 'complete') {
+            throw new Error('DOM is not fully loaded. Please ensure the script is loaded after DOM is ready.');
+        }
+        
         // Application state
         this.currentData = null;
         this.analysisResults = null;
@@ -164,6 +169,44 @@ export class HealthcareRevenueApp {
         
         if (unsupportedFeatures.length > 0) {
             throw new Error(`Browser doesn't support required features: ${unsupportedFeatures.join(', ')}`);
+        }
+        
+        // Verify chart containers exist and are visible
+        const chartContainers = [
+            'overviewChart',
+            'performanceChart',
+            'trendsChart',
+            'payerChart',
+            'correlationChart'
+        ];
+        
+        for (const id of chartContainers) {
+            const container = document.getElementById(id);
+            if (!container) {
+                throw new Error(`Chart container ${id} not found`);
+            }
+            
+            const chartContainer = container.closest('.chart-container');
+            if (!chartContainer) {
+                throw new Error(`Chart container wrapper for ${id} not found`);
+            }
+            
+            // Force container to be visible and have dimensions
+            chartContainer.style.display = 'block';
+            chartContainer.style.height = '400px';
+            chartContainer.style.width = '100%';
+            chartContainer.style.visibility = 'visible';
+            chartContainer.style.opacity = '1';
+            
+            // Force a reflow
+            chartContainer.offsetHeight;
+            chartContainer.classList.add('visible');
+            
+            // Verify container has dimensions
+            const rect = chartContainer.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) {
+                throw new Error(`Chart container ${id} has zero dimensions`);
+            }
         }
         
         console.log('✅ Environment validation completed');
@@ -702,21 +745,40 @@ export class HealthcareRevenueApp {
         console.log('📊 Displaying analysis results...');
         
         try {
+            // Validate results before displaying
+            if (!results || typeof results !== 'object') {
+                throw new Error('Invalid results object');
+            }
+
+            // Log the structure of the results
+            console.log('Analysis results structure:', {
+                hasFinalResults: !!results.finalResults,
+                finalResultsLength: results.finalResults?.length,
+                hasPerformanceResults: !!results.performanceResults,
+                performanceResultsLength: results.performanceResults?.length,
+                hasTrainCorrelations: !!results.trainCorrelations,
+                sampleFinalResult: results.finalResults?.[0]
+            });
+            
             // Show analysis container
             const analysisContainer = document.getElementById('analysisContainer');
-            if (analysisContainer) {
-                analysisContainer.style.display = 'block';
-                // Force a reflow
-                analysisContainer.offsetHeight;
-                analysisContainer.classList.add('visible');
+            if (!analysisContainer) {
+                throw new Error('Analysis container not found in DOM');
             }
+            
+            analysisContainer.style.display = 'block';
+            // Force a reflow
+            analysisContainer.offsetHeight;
+            analysisContainer.classList.add('visible');
             
             // Update metrics displays
             this.updateOverviewMetrics(results);
             this.updatePerformanceMetrics(results);
             
             // Generate visualizations
+            console.log('Starting chart generation...');
             await this.generateCharts(results);
+            console.log('Chart generation completed');
             
             // Update data tables
             this.updateDataTables(results);
@@ -728,6 +790,11 @@ export class HealthcareRevenueApp {
             
         } catch (error) {
             console.error('❌ Results display failed:', error);
+            // Display error to user
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = `Failed to display results: ${error.message}`;
+            document.querySelector('.analysis-container')?.prepend(errorMessage);
             throw error;
         }
     }

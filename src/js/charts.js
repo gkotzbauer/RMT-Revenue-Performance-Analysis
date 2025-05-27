@@ -23,19 +23,27 @@ export class ChartManager {
     async init() {
         console.log('📊 Initializing Chart Manager...');
         
-        // Configure Chart.js defaults
-        if (typeof Chart !== 'undefined') {
-            Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-            Chart.defaults.font.size = 12;
-            Chart.defaults.color = '#374151';
-            Chart.defaults.plugins.legend.labels.usePointStyle = true;
-            Chart.defaults.plugins.legend.labels.padding = 20;
-            Chart.defaults.elements.point.radius = 4;
-            Chart.defaults.elements.point.hoverRadius = 6;
-            Chart.defaults.elements.line.tension = 0.1;
+        // Verify Chart.js is loaded and ready
+        if (typeof Chart === 'undefined') {
+            throw new Error('Chart.js library is not loaded');
+        }
+
+        // Wait for DOM to be fully loaded
+        if (document.readyState !== 'complete') {
+            await new Promise(resolve => window.addEventListener('load', resolve));
         }
         
-        // Ensure chart containers are visible
+        // Configure Chart.js defaults
+        Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = '#374151';
+        Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        Chart.defaults.plugins.legend.labels.padding = 20;
+        Chart.defaults.elements.point.radius = 4;
+        Chart.defaults.elements.point.hoverRadius = 6;
+        Chart.defaults.elements.line.tension = 0.1;
+        
+        // Ensure chart containers are visible and have dimensions
         const chartContainers = [
             'overviewChart',
             'performanceChart',
@@ -44,18 +52,34 @@ export class ChartManager {
             'correlationChart'
         ];
         
-        chartContainers.forEach(id => {
+        for (const id of chartContainers) {
             const container = document.getElementById(id);
-            if (container) {
-                const chartContainer = container.closest('.chart-container');
-                if (chartContainer) {
-                    chartContainer.style.display = 'block';
-                    // Force a reflow
-                    chartContainer.offsetHeight;
-                    chartContainer.classList.add('visible');
-                }
+            if (!container) {
+                throw new Error(`Chart container ${id} not found`);
             }
-        });
+            
+            const chartContainer = container.closest('.chart-container');
+            if (!chartContainer) {
+                throw new Error(`Chart container wrapper for ${id} not found`);
+            }
+            
+            // Force container to be visible and have dimensions
+            chartContainer.style.display = 'block';
+            chartContainer.style.height = '400px';
+            chartContainer.style.width = '100%';
+            chartContainer.style.visibility = 'visible';
+            chartContainer.style.opacity = '1';
+            
+            // Force a reflow
+            chartContainer.offsetHeight;
+            chartContainer.classList.add('visible');
+            
+            // Verify container has dimensions
+            const rect = chartContainer.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) {
+                throw new Error(`Chart container ${id} has zero dimensions`);
+            }
+        }
         
         this.isInitialized = true;
         console.log('✅ Chart Manager initialized');
@@ -69,13 +93,30 @@ export class ChartManager {
             await this.init();
         }
 
-        if (!results || !results.finalResults) {
-            const error = new Error('Invalid or missing results data for chart generation');
-            console.error('Chart generation failed:', error);
-            throw error;
+        // Validate results structure
+        if (!results || typeof results !== 'object') {
+            throw new Error('Invalid results: must be an object');
         }
+
+        if (!results.finalResults || !Array.isArray(results.finalResults)) {
+            throw new Error('Invalid results: finalResults must be an array');
+        }
+
+        if (results.finalResults.length === 0) {
+            throw new Error('Invalid results: finalResults array is empty');
+        }
+
+        // Log the structure of the results
+        console.log('Results structure:', {
+            hasFinalResults: !!results.finalResults,
+            finalResultsLength: results.finalResults?.length,
+            hasPerformanceResults: !!results.performanceResults,
+            performanceResultsLength: results.performanceResults?.length,
+            hasTrainCorrelations: !!results.trainCorrelations,
+            sampleFinalResult: results.finalResults?.[0]
+        });
         
-        // Ensure chart containers are visible before generating charts
+        // Verify chart containers are still valid
         const chartContainers = [
             'overviewChart',
             'performanceChart',
@@ -84,25 +125,23 @@ export class ChartManager {
             'correlationChart'
         ];
         
-        // First, make all chart containers visible
-        chartContainers.forEach(id => {
+        for (const id of chartContainers) {
             const container = document.getElementById(id);
-            if (container) {
-                console.log(`Found container for ${id}`);
-                const chartContainer = container.closest('.chart-container');
-                if (chartContainer) {
-                    chartContainer.style.display = 'block';
-                    // Force a reflow
-                    chartContainer.offsetHeight;
-                    chartContainer.classList.add('visible');
-                    console.log(`Made ${id} container visible`);
-                } else {
-                    console.warn(`No .chart-container parent found for ${id}`);
-                }
-            } else {
-                console.warn(`Container element not found for ${id}`);
+            if (!container) {
+                throw new Error(`Chart container ${id} not found during generation`);
             }
-        });
+            
+            const chartContainer = container.closest('.chart-container');
+            if (!chartContainer) {
+                throw new Error(`Chart container wrapper for ${id} not found during generation`);
+            }
+            
+            // Verify container is visible and has dimensions
+            const rect = chartContainer.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) {
+                throw new Error(`Chart container ${id} has zero dimensions during generation`);
+            }
+        }
         
         try {
             // Generate all charts
@@ -134,6 +173,8 @@ export class ChartManager {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => {
                 section.style.display = 'block';
+                section.style.visibility = 'visible';
+                section.style.opacity = '1';
                 // Force a reflow
                 section.offsetHeight;
                 section.classList.add('visible');
