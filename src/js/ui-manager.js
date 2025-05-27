@@ -245,42 +245,54 @@ export class UIManager {
 
         const fileName = document.getElementById('fileName');
         const fileStats = document.getElementById('fileStats');
+        const analysisContainer = document.getElementById('analysisContainer');
         
         if (fileName) {
             fileName.textContent = file.name;
         }
         
         if (fileStats) {
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            const recordCount = data.length;
-            const uniqueWeeks = [...new Set(data.map(r => `${r.year}-${r.week}`))].length;
+            const stats = {
+                rows: data.length,
+                size: this.formatFileSize(file.size),
+                date: new Date(file.lastModified).toLocaleDateString()
+            };
             
             fileStats.innerHTML = `
-                <div>📁 Size: ${fileSize} MB</div>
-                <div>📊 Records: ${recordCount.toLocaleString()}</div>
-                <div>📅 Weeks: ${uniqueWeeks}</div>
-                <div>✅ Ready for analysis</div>
+                <div class="stat">
+                    <i class="fas fa-table"></i>
+                    <span>${stats.rows} rows</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-file"></i>
+                    <span>${stats.size}</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-calendar"></i>
+                    <span>${stats.date}</span>
+                </div>
             `;
         }
-        
-        // Show file info panel
-        this.fileInfo.classList.add('show');
-        
-        // Update upload area appearance
-        const uploadArea = document.getElementById('uploadArea');
-        if (uploadArea) {
-            uploadArea.classList.add('file-loaded');
-        }
 
-        // Show analysis container with animation
-        const analysisContainer = document.getElementById('analysisContainer');
+        // Show and fade in the analysis container
         if (analysisContainer) {
             analysisContainer.style.display = 'block';
-            // Use requestAnimationFrame to ensure the display: block is applied before adding the active class
             requestAnimationFrame(() => {
-                analysisContainer.classList.add('active');
+                this.fadeIn(analysisContainer);
             });
         }
+
+        // Show file info container
+        this.fileInfo.style.display = 'block';
+        this.fadeIn(this.fileInfo);
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     enableAnalysisButton() {

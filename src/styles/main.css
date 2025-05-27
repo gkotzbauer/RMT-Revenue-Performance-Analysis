@@ -919,15 +919,37 @@ html {
 }
 
 /* Analysis Container */
-.analysis-container {
-    display: none;
+#analysisContainer {
     opacity: 0;
-    transition: opacity var(--transition-normal);
+    transition: opacity 0.3s ease-in-out;
+    display: none;
 }
 
-.analysis-container.active {
-    display: block;
+#analysisContainer.active {
     opacity: 1;
+}
+
+#fileInfo {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    display: none;
+}
+
+#fileInfo.active {
+    opacity: 1;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat i {
+    width: 1.5rem;
+    text-align: center;
+    color: var(--primary-color);
 }
 
 /* Export Buttons */
