@@ -272,11 +272,14 @@ export class UIManager {
             uploadArea.classList.add('file-loaded');
         }
 
-        // Show analysis container
+        // Show analysis container with animation
         const analysisContainer = document.getElementById('analysisContainer');
         if (analysisContainer) {
-            analysisContainer.classList.add('active');
             analysisContainer.style.display = 'block';
+            // Use requestAnimationFrame to ensure the display: block is applied before adding the active class
+            requestAnimationFrame(() => {
+                analysisContainer.classList.add('active');
+            });
         }
     }
 
@@ -319,11 +322,16 @@ export class UIManager {
             uploadArea.classList.remove('file-loaded');
         }
         
-        // Hide analysis container
+        // Hide analysis container with animation
         const analysisContainer = document.getElementById('analysisContainer');
         if (analysisContainer) {
             analysisContainer.classList.remove('active');
-            analysisContainer.style.display = 'none';
+            // Wait for the fade out animation to complete before hiding
+            setTimeout(() => {
+                if (!analysisContainer.classList.contains('active')) {
+                    analysisContainer.style.display = 'none';
+                }
+            }, 300); // Match the transition duration
         }
         
         // Disable analysis button
