@@ -8,6 +8,7 @@ import { formatCurrency, formatPercentage } from './utils.js';
 export class ChartManager {
     constructor() {
         this.charts = {};
+        this.isInitialized = false;
         this.colors = {
             primary: '#2563eb',
             secondary: '#0891b2',
@@ -19,7 +20,7 @@ export class ChartManager {
         };
     }
 
-    init() {
+    async init() {
         console.log('📊 Initializing Chart Manager...');
         
         // Configure Chart.js defaults
@@ -34,7 +35,65 @@ export class ChartManager {
             Chart.defaults.elements.line.tension = 0.1;
         }
         
+        // Ensure chart containers are visible
+        const chartContainers = [
+            'overviewChart',
+            'performanceChart',
+            'trendsChart',
+            'payerChart',
+            'correlationChart'
+        ];
+        
+        chartContainers.forEach(id => {
+            const container = document.getElementById(id);
+            if (container) {
+                const chartContainer = container.closest('.chart-container');
+                if (chartContainer) {
+                    chartContainer.style.display = 'block';
+                    // Force a reflow
+                    chartContainer.offsetHeight;
+                    chartContainer.classList.add('visible');
+                }
+            }
+        });
+        
+        this.isInitialized = true;
         console.log('✅ Chart Manager initialized');
+    }
+
+    async generateCharts(results) {
+        if (!this.isInitialized) {
+            await this.init();
+        }
+        
+        // Ensure chart containers are visible before generating charts
+        const chartContainers = [
+            'overviewChart',
+            'performanceChart',
+            'trendsChart',
+            'payerChart',
+            'correlationChart'
+        ];
+        
+        chartContainers.forEach(id => {
+            const container = document.getElementById(id);
+            if (container) {
+                const chartContainer = container.closest('.chart-container');
+                if (chartContainer) {
+                    chartContainer.style.display = 'block';
+                    // Force a reflow
+                    chartContainer.offsetHeight;
+                    chartContainer.classList.add('visible');
+                }
+            }
+        });
+        
+        // Generate all charts
+        await this.generateOverviewChart(results);
+        await this.generatePerformanceChart(results);
+        await this.generateTrendsChart(results);
+        await this.generatePayerChart(results);
+        await this.generateCorrelationChart(results);
     }
 
     generateOverviewChart(results) {
