@@ -136,7 +136,18 @@ export class ChartManager {
                 throw new Error(`Chart container wrapper for ${id} not found during generation`);
             }
             
-            // Verify container is visible and has dimensions
+            // Force container to be visible and have dimensions
+            chartContainer.style.display = 'block';
+            chartContainer.style.height = '400px';
+            chartContainer.style.width = '100%';
+            chartContainer.style.visibility = 'visible';
+            chartContainer.style.opacity = '1';
+            
+            // Force a reflow
+            chartContainer.offsetHeight;
+            chartContainer.classList.add('visible');
+            
+            // Verify container has dimensions
             const rect = chartContainer.getBoundingClientRect();
             if (rect.width === 0 || rect.height === 0) {
                 throw new Error(`Chart container ${id} has zero dimensions during generation`);
