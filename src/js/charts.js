@@ -68,6 +68,12 @@ export class ChartManager {
             console.log('Chart manager not initialized, initializing now...');
             await this.init();
         }
+
+        if (!results || !results.finalResults) {
+            const error = new Error('Invalid or missing results data for chart generation');
+            console.error('Chart generation failed:', error);
+            throw error;
+        }
         
         // Ensure chart containers are visible before generating charts
         const chartContainers = [
@@ -102,28 +108,25 @@ export class ChartManager {
             // Generate all charts
             console.log('Starting to generate individual charts...');
             
-            await Promise.all([
-                this.generateOverviewChart(results).catch(error => {
-                    console.error('Error generating overview chart:', error);
-                    throw error;
-                }),
-                this.generatePerformanceChart(results).catch(error => {
-                    console.error('Error generating performance chart:', error);
-                    throw error;
-                }),
-                this.generateTrendsChart(results).catch(error => {
-                    console.error('Error generating trends chart:', error);
-                    throw error;
-                }),
-                this.generatePayerChart(results).catch(error => {
-                    console.error('Error generating payer chart:', error);
-                    throw error;
-                }),
-                this.generateCorrelationChart(results).catch(error => {
-                    console.error('Error generating correlation chart:', error);
-                    throw error;
-                })
-            ]);
+            const chartPromises = [
+                this.generateOverviewChart(results),
+                this.generatePerformanceChart(results),
+                this.generateTrendsChart(results),
+                this.generatePayerChart(results),
+                this.generateCorrelationChart(results)
+            ];
+
+            const results = await Promise.allSettled(chartPromises);
+            
+            // Check for any rejected promises
+            const errors = results
+                .filter(result => result.status === 'rejected')
+                .map(result => result.reason);
+
+            if (errors.length > 0) {
+                console.error('Some charts failed to generate:', errors);
+                throw new Error(`Failed to generate charts: ${errors.map(e => e.message).join(', ')}`);
+            }
             
             console.log('All charts generated successfully');
             
@@ -138,6 +141,11 @@ export class ChartManager {
             
         } catch (error) {
             console.error('Error during chart generation:', error);
+            // Display error to user
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = `Charts could not be generated: ${error.message}`;
+            document.querySelector('.analysis-container').prepend(errorMessage);
             throw error;
         }
     }

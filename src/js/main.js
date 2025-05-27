@@ -34,6 +34,11 @@ export class HealthcareRevenueApp {
     constructor() {
         console.log('🏗️ Initializing Healthcare Revenue Analysis Application...');
         
+        // Verify Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            throw new Error('Chart.js library is not loaded. Please ensure it is loaded before the application script.');
+        }
+        
         // Application state
         this.currentData = null;
         this.analysisResults = null;
