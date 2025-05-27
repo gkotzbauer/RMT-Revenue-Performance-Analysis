@@ -250,7 +250,9 @@ export class UIManager {
         }
         
         if (fileStatsElement) {
-            fileStatsElement.textContent = stats;
+            // Ensure stats is a string
+            const statsText = typeof stats === 'string' ? stats : JSON.stringify(stats);
+            fileStatsElement.textContent = statsText;
         }
         
         if (fileInfo) {
