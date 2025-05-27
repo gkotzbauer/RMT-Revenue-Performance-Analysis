@@ -240,83 +240,141 @@ export class UIManager {
         }
     }
 
-    showFileInfo(file, data) {
-        if (!this.fileInfo) return;
-
-        const fileName = document.getElementById('fileName');
-        const fileStats = document.getElementById('fileStats');
-        const analysisContainer = document.getElementById('analysisContainer');
+    showFileInfo(fileName, stats) {
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameElement = document.getElementById('fileName');
+        const fileStatsElement = document.getElementById('fileStats');
         
-        if (fileName) {
-            fileName.textContent = file.name;
+        if (fileNameElement) {
+            fileNameElement.textContent = fileName;
         }
         
-        if (fileStats) {
-            const stats = {
-                rows: data.length,
-                size: this.formatFileSize(file.size),
-                date: new Date(file.lastModified).toLocaleDateString()
-            };
-            
-            fileStats.innerHTML = `
-                <div class="stat">
-                    <i class="fas fa-table"></i>
-                    <span>${stats.rows} rows</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-file"></i>
-                    <span>${stats.size}</span>
-                </div>
-                <div class="stat">
-                    <i class="fas fa-calendar"></i>
-                    <span>${stats.date}</span>
+        if (fileStatsElement) {
+            fileStatsElement.textContent = stats;
+        }
+        
+        if (fileInfo) {
+            fileInfo.style.display = 'block';
+            // Force a reflow
+            fileInfo.offsetHeight;
+            fileInfo.classList.add('visible');
+        }
+    }
+
+    showAnalysisResults(results) {
+        // Show the analysis container
+        const analysisContainer = document.getElementById('analysisContainer');
+        if (analysisContainer) {
+            analysisContainer.style.display = 'block';
+            // Force a reflow
+            analysisContainer.offsetHeight;
+            analysisContainer.classList.add('visible');
+        }
+
+        // Update executive summary
+        this.updateExecutiveSummary(results);
+
+        // Update key metrics
+        this.updateKeyMetrics(results);
+
+        // Update charts
+        if (window.healthcareApp?.chartManager) {
+            window.healthcareApp.chartManager.generateCharts(results);
+        }
+
+        // Update data table
+        this.updateDataTable(results);
+
+        // Update action items
+        this.updateActionItems(results);
+    }
+
+    updateExecutiveSummary(results) {
+        const executiveSummary = document.getElementById('executiveSummary');
+        const keyInsight = document.getElementById('keyInsight');
+        
+        if (executiveSummary && results.summary) {
+            executiveSummary.innerHTML = `
+                <div class="alert alert-success">
+                    <h3>${results.summary.title}</h3>
+                    <p>${results.summary.description}</p>
                 </div>
             `;
         }
 
-        // Show and fade in the analysis container
-        if (analysisContainer) {
-            // First ensure the container is visible
-            analysisContainer.style.display = 'block';
-            
-            // Force a reflow
-            analysisContainer.offsetHeight;
-            
-            // Add visible class for transition
-            analysisContainer.classList.add('visible');
-            
-            // Show all sections within the analysis container
-            const sections = analysisContainer.querySelectorAll('.section');
-            sections.forEach(section => {
-                section.style.display = 'block';
-                // Force a reflow
-                section.offsetHeight;
-                // Add visible class for transition
-                section.classList.add('visible');
-            });
-            
-            // Show the run analysis button
-            const runAnalysisBtn = document.getElementById('runAnalysisBtn');
-            if (runAnalysisBtn) {
-                runAnalysisBtn.style.display = 'inline-flex';
-                runAnalysisBtn.disabled = false;
-            }
+        if (keyInsight && results.keyInsight) {
+            keyInsight.textContent = results.keyInsight;
         }
-
-        // Show file info container
-        this.fileInfo.style.display = 'block';
-        // Force a reflow
-        this.fileInfo.offsetHeight;
-        // Add visible class for transition
-        this.fileInfo.classList.add('visible');
     }
 
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    updateKeyMetrics(results) {
+        const keyMetrics = document.getElementById('keyMetrics');
+        if (!keyMetrics || !results.metrics) return;
+
+        keyMetrics.innerHTML = results.metrics.map(metric => `
+            <div class="metric-card">
+                <div class="metric-value">${metric.value}</div>
+                <div class="metric-label">${metric.label}</div>
+            </div>
+        `).join('');
+    }
+
+    updateDataTable(results) {
+        const tableBody = document.getElementById('dataTableBody');
+        if (!tableBody || !results.weeklyData) return;
+
+        tableBody.innerHTML = results.weeklyData.map(week => `
+            <tr>
+                <td>${week.year}</td>
+                <td>${week.week}</td>
+                <td>${this.formatCurrency(week.actualTotalPayments)}</td>
+                <td>${this.formatCurrency(week.predictedTotalPayments)}</td>
+                <td>${this.formatCurrency(week.avgPaymentPerVisit)}</td>
+                <td>
+                    <span class="performance-${this.getPerformanceClass(week.performance)}">
+                        ${this.formatPercentage(week.performance)}
+                    </span>
+                </td>
+                <td>${week.mostInfluentialFactors.join(', ')}</td>
+            </tr>
+        `).join('');
+    }
+
+    updateActionItems(results) {
+        const actionItems = document.getElementById('actionItems');
+        if (!actionItems || !results.recommendations) return;
+
+        actionItems.innerHTML = results.recommendations.map(rec => `
+            <div class="action-card">
+                <h3>${rec.title}</h3>
+                <ul class="action-list">
+                    ${rec.items.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
+    }
+
+    getPerformanceClass(performance) {
+        if (performance >= 1.1) return 'over';
+        if (performance >= 0.9) return 'average';
+        return 'under';
+    }
+
+    formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
+    formatPercentage(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'percent',
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        }).format(value);
     }
 
     enableAnalysisButton() {
