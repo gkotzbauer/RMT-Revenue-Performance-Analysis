@@ -39,14 +39,14 @@ app.use(express.static(path.join(__dirname, 'dist'), {
   setHeaders: (res, filePath) => {
     // Set proper MIME types
     if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
     } else if (filePath.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
     } else if (filePath.endsWith('.png')) {
       res.setHeader('Content-Type', 'image/png');
     } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {

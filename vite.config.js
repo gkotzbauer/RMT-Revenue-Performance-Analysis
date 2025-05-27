@@ -34,7 +34,7 @@ export default defineConfig({
     open: true, 
     cors: true,
     headers: {
-      'Content-Type': 'application/javascript',
+      'Content-Type': 'application/javascript; charset=utf-8',
       'X-Content-Type-Options': 'nosniff'
     }
   },
