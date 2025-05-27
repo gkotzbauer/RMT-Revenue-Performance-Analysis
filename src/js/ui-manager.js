@@ -276,15 +276,39 @@ export class UIManager {
 
         // Show and fade in the analysis container
         if (analysisContainer) {
+            // First ensure the container is visible
             analysisContainer.style.display = 'block';
+            
             // Force a reflow
             analysisContainer.offsetHeight;
-            analysisContainer.style.opacity = '1';
+            
+            // Add visible class for transition
+            analysisContainer.classList.add('visible');
+            
+            // Show all sections within the analysis container
+            const sections = analysisContainer.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = 'block';
+                // Force a reflow
+                section.offsetHeight;
+                // Add visible class for transition
+                section.classList.add('visible');
+            });
+            
+            // Show the run analysis button
+            const runAnalysisBtn = document.getElementById('runAnalysisBtn');
+            if (runAnalysisBtn) {
+                runAnalysisBtn.style.display = 'inline-flex';
+                runAnalysisBtn.disabled = false;
+            }
         }
 
         // Show file info container
         this.fileInfo.style.display = 'block';
-        this.fileInfo.style.opacity = '1';
+        // Force a reflow
+        this.fileInfo.offsetHeight;
+        // Add visible class for transition
+        this.fileInfo.classList.add('visible');
     }
 
     formatFileSize(bytes) {
@@ -521,4 +545,4 @@ export class UIManager {
 document.addEventListener('DOMContentLoaded', () => {
     const uiManager = new UIManager();
     uiManager.initializeResponsive?.();
-}); 
+});

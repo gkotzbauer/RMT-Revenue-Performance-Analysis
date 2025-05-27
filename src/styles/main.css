@@ -921,26 +921,43 @@ html {
 /* Analysis Container */
 #analysisContainer {
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    display: none;
     visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    display: none;
 }
 
 #analysisContainer.visible {
     opacity: 1;
     visibility: visible;
+    display: block;
 }
 
+/* Analysis Sections */
+.section {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    display: none;
+}
+
+.section.visible {
+    opacity: 1;
+    visibility: visible;
+    display: block;
+}
+
+/* File Info */
 #fileInfo {
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    display: none;
     visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    display: none;
 }
 
 #fileInfo.visible {
     opacity: 1;
     visibility: visible;
+    display: block;
 }
 
 .stat {
