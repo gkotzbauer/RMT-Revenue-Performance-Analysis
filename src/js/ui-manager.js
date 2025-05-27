@@ -277,14 +277,14 @@ export class UIManager {
         // Show and fade in the analysis container
         if (analysisContainer) {
             analysisContainer.style.display = 'block';
-            requestAnimationFrame(() => {
-                this.fadeIn(analysisContainer);
-            });
+            // Force a reflow
+            analysisContainer.offsetHeight;
+            analysisContainer.style.opacity = '1';
         }
 
         // Show file info container
         this.fileInfo.style.display = 'block';
-        this.fadeIn(this.fileInfo);
+        this.fileInfo.style.opacity = '1';
     }
 
     formatFileSize(bytes) {

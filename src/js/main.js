@@ -520,6 +520,9 @@ export class HealthcareRevenueApp {
             
             console.log('✅ File processing completed successfully');
             
+            // Automatically run analysis after loading the file
+            await this.runAnalysis();
+            
         } catch (error) {
             console.error('❌ File processing failed:', error);
             this.uiManager.hideLoading();

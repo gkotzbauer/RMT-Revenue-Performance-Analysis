@@ -923,20 +923,24 @@ html {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     display: none;
+    visibility: hidden;
 }
 
-#analysisContainer.active {
+#analysisContainer.visible {
     opacity: 1;
+    visibility: visible;
 }
 
 #fileInfo {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     display: none;
+    visibility: hidden;
 }
 
-#fileInfo.active {
+#fileInfo.visible {
     opacity: 1;
+    visibility: visible;
 }
 
 .stat {
@@ -950,6 +954,27 @@ html {
     width: 1.5rem;
     text-align: center;
     color: var(--primary-color);
+}
+
+/* Ensure proper stacking context */
+.analysis-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
 }
 
 /* Export Buttons */
