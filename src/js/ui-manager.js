@@ -250,9 +250,92 @@ export class UIManager {
         }
         
         if (fileStatsElement) {
-            // Ensure stats is a string
-            const statsText = typeof stats === 'string' ? stats : JSON.stringify(stats);
-            fileStatsElement.textContent = statsText;
+            let statsHtml = '';
+            
+            if (Array.isArray(stats)) {
+                // Group data by payer
+                const payerGroups = stats.reduce((acc, record) => {
+                    if (!acc[record.payer]) {
+                        acc[record.payer] = {
+                            totalPayments: 0,
+                            totalVisits: 0
+                        };
+                    }
+                    acc[record.payer].totalPayments += record.totalPayments || 0;
+                    acc[record.payer].totalVisits += record.visitCount || 0;
+                    return acc;
+                }, {});
+
+                // Calculate overall totals
+                const totalRecords = stats.length;
+                const totalPayments = Object.values(payerGroups).reduce((sum, group) => sum + group.totalPayments, 0);
+                const totalVisits = Object.values(payerGroups).reduce((sum, group) => sum + group.totalVisits, 0);
+                const avgPaymentPerVisit = totalVisits > 0 ? totalPayments / totalVisits : 0;
+
+                statsHtml = `
+                    <div class="stats-container">
+                        <div class="stat-section">
+                            <h4>Overall Summary</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Records:</span>
+                                <span class="stat-value">${this.formatNumber(totalRecords)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Payments:</span>
+                                <span class="stat-value">${this.formatCurrency(totalPayments)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Visits:</span>
+                                <span class="stat-value">${this.formatNumber(totalVisits)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Average Payment per Visit:</span>
+                                <span class="stat-value">${this.formatCurrency(avgPaymentPerVisit)}</span>
+                            </div>
+                        </div>`;
+
+                // Add payer-specific summaries
+                Object.entries(payerGroups).forEach(([payer, data]) => {
+                    const avgPayment = data.totalVisits > 0 ? data.totalPayments / data.totalVisits : 0;
+                    
+                    statsHtml += `
+                        <div class="stat-section">
+                            <h4>${payer}</h4>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Payments:</span>
+                                <span class="stat-value">${this.formatCurrency(data.totalPayments)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Total Visits:</span>
+                                <span class="stat-value">${this.formatNumber(data.totalVisits)}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Average Payment per Visit:</span>
+                                <span class="stat-value">${this.formatCurrency(avgPayment)}</span>
+                            </div>
+                        </div>`;
+                });
+                
+                statsHtml += '</div>';
+            } else if (typeof stats === 'object') {
+                statsHtml = '<div class="stats-container">';
+                Object.entries(stats).forEach(([key, value]) => {
+                    statsHtml += `
+                        <div class="stat-row">
+                            <span class="stat-label">${key}:</span>
+                            <span class="stat-value">${value}</span>
+                        </div>`;
+                });
+                statsHtml += '</div>';
+            } else {
+                statsHtml = `<div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-value">${String(stats)}</span>
+                    </div>
+                </div>`;
+            }
+            
+            fileStatsElement.innerHTML = statsHtml;
         }
         
         if (fileInfo) {

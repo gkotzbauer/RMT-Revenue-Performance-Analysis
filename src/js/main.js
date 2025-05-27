@@ -511,7 +511,7 @@ export class HealthcareRevenueApp {
             // Update UI
             this.uiManager.updateProgress(100);
             this.uiManager.hideLoading();
-            this.uiManager.showFileInfo(file, data);
+            this.uiManager.showFileInfo(file.name, data);
             this.uiManager.enableAnalysisButton();
             
             // Success message
