@@ -75,6 +75,7 @@ export class ChartManager {
             'correlationChart'
         ];
         
+        // First, make all chart containers visible
         chartContainers.forEach(id => {
             const container = document.getElementById(id);
             if (container) {
@@ -89,11 +90,22 @@ export class ChartManager {
         });
         
         // Generate all charts
-        await this.generateOverviewChart(results);
-        await this.generatePerformanceChart(results);
-        await this.generateTrendsChart(results);
-        await this.generatePayerChart(results);
-        await this.generateCorrelationChart(results);
+        await Promise.all([
+            this.generateOverviewChart(results),
+            this.generatePerformanceChart(results),
+            this.generateTrendsChart(results),
+            this.generatePayerChart(results),
+            this.generateCorrelationChart(results)
+        ]);
+        
+        // Ensure all sections are visible
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => {
+            section.style.display = 'block';
+            // Force a reflow
+            section.offsetHeight;
+            section.classList.add('visible');
+        });
     }
 
     generateOverviewChart(results) {

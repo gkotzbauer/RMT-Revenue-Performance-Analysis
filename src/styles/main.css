@@ -930,30 +930,52 @@ html {
 
 /* Analysis Container */
 #analysisContainer {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     display: none;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+    box-shadow: var(--shadow-lg);
 }
 
 #analysisContainer.visible {
-    opacity: 1;
-    visibility: visible;
     display: block;
+    opacity: 1;
 }
 
-/* Analysis Sections */
 .section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-xl);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-    display: none;
+    transform: translateY(20px);
 }
 
 .section.visible {
     opacity: 1;
-    visibility: visible;
-    display: block;
+    transform: translateY(0);
+}
+
+.chart-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+    opacity: 0;
+    transform: translateY(20px);
+    height: 400px;
+}
+
+.chart-container.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* File Info */

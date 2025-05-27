@@ -511,7 +511,11 @@ export class HealthcareRevenueApp {
             // Update UI
             this.uiManager.updateProgress(100);
             this.uiManager.hideLoading();
+            
+            // Show file info
             this.uiManager.showFileInfo(file.name, data);
+            
+            // Enable analysis button
             this.uiManager.enableAnalysisButton();
             
             // Success message
@@ -520,8 +524,13 @@ export class HealthcareRevenueApp {
             
             console.log('✅ File processing completed successfully');
             
-            // Automatically run analysis after loading the file
+            // Run analysis
             await this.runAnalysis();
+            
+            // Display analysis results
+            if (this.analysisResults) {
+                await this.displayAnalysisResults(this.analysisResults);
+            }
             
         } catch (error) {
             console.error('❌ File processing failed:', error);
@@ -633,9 +642,6 @@ export class HealthcareRevenueApp {
             // Update application state
             this.analysisResults = deepClone(results);
             
-            // Display results
-            await this.displayAnalysisResults(results);
-            
             // Success message
             const accuracy = results.benchmarks?.avgAccuracy || 'N/A';
             const model = results.bestModel?.modelName || 'Unknown';
@@ -646,10 +652,13 @@ export class HealthcareRevenueApp {
             
             console.log('✅ Statistical analysis completed successfully');
             
+            return results;
+            
         } catch (error) {
             console.error('❌ Analysis failed:', error);
             this.uiManager.hideLoading();
             this.handleAnalysisError(error);
+            throw error;
         } finally {
             this.isProcessing = false;
         }
@@ -688,6 +697,15 @@ export class HealthcareRevenueApp {
         console.log('📊 Displaying analysis results...');
         
         try {
+            // Show analysis container
+            const analysisContainer = document.getElementById('analysisContainer');
+            if (analysisContainer) {
+                analysisContainer.style.display = 'block';
+                // Force a reflow
+                analysisContainer.offsetHeight;
+                analysisContainer.classList.add('visible');
+            }
+            
             // Update metrics displays
             this.updateOverviewMetrics(results);
             this.updatePerformanceMetrics(results);
