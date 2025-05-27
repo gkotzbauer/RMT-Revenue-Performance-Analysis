@@ -446,139 +446,95 @@
         </div>
 
         <!-- Analysis Container -->
-        <div class="analysis-container" id="analysisContainer">
-            <!-- Filter Section -->
-            <div class="section filter-section">
-                <h2>🔍 Filter</h2>
-                <div class="filter-grid">
-                    <div class="filter-group">
-                        <label for="weekFilter">Week(s)</label>
-                        <div class="custom-select" id="weekFilter">
-                            <div class="select-selected">Select Week(s)</div>
-                            <div class="select-items select-hide">
-                                <div class="select-options">
-                                    <!-- Week options will be populated by JavaScript -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label for="performanceFilter">Performance Category</label>
-                        <div class="custom-select">
-                            <div class="select-selected">Select Performance</div>
-                            <div class="select-items select-hide">
-                                <div class="select-option">
-                                    <input type="checkbox" id="overPerformed" value="Over Performed">
-                                    <label for="overPerformed">Over Performed</label>
-                                </div>
-                                <div class="select-option">
-                                    <input type="checkbox" id="averagePerformance" value="Average Performance">
-                                    <label for="averagePerformance">Average Performance</label>
-                                </div>
-                                <div class="select-option">
-                                    <input type="checkbox" id="underPerformed" value="Under Performed">
-                                    <label for="underPerformed">Under Performed</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div id="analysisContainer" class="analysis-container">
+            <!-- Executive Summary Section -->
             <div class="section executive-summary">
-                <h2>🎯 Executive Summary - What You Need to Know</h2>
-                <div id="executiveSummary">
-                    <div class="key-metrics" id="keyMetrics">
-                        <!-- Metrics will be populated by JavaScript -->
-                    </div>
-                    <div class="alert alert-success" id="keyInsight">
-                        <!-- Key insight will be populated by JavaScript -->
-                    </div>
-                </div>
+                <h2>Executive Summary</h2>
+                <div id="executiveSummary"></div>
             </div>
 
+            <!-- Key Metrics Section -->
             <div class="section">
-                <h2>📈 Your Performance at a Glance</h2>
+                <h2>Key Performance Metrics</h2>
+                <div class="key-metrics" id="keyMetrics"></div>
+            </div>
+
+            <!-- Performance Analysis Section -->
+            <div class="section">
+                <h2>Performance Analysis</h2>
                 <div class="performance-grid">
+                    <!-- Overview Chart -->
                     <div class="chart-container">
                         <canvas id="overviewChart"></canvas>
                     </div>
+                    <!-- Performance Chart -->
                     <div class="chart-container">
                         <canvas id="performanceChart"></canvas>
+                    </div>
+                    <!-- Trends Chart -->
+                    <div class="chart-container">
+                        <canvas id="trendsChart"></canvas>
+                    </div>
+                    <!-- Payer Mix Chart -->
+                    <div class="chart-container">
+                        <canvas id="payerChart"></canvas>
+                    </div>
+                    <!-- Correlation Chart -->
+                    <div class="chart-container">
+                        <canvas id="correlationChart"></canvas>
                     </div>
                 </div>
             </div>
 
+            <!-- Insights Table Section -->
             <div class="section">
-                <h2>📊 Revenue Trends</h2>
-                <div class="chart-container">
-                    <canvas id="trendsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🏥 Payer Mix Analysis</h2>
-                <div class="chart-container">
-                    <canvas id="payerChart"></canvas>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📈 Revenue Drivers</h2>
-                <div class="chart-container">
-                    <canvas id="correlationChart"></canvas>
-                </div>
-            </div>
-
-            <div class="section recommendations">
-                <h2>🚀 What You Should Do Next</h2>
-                <div class="action-items" id="actionItems">
-                    <!-- Action items will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>📋 Weekly Performance Details</h2>
-                <div class="table-container">
-                    <table class="data-table" id="detailsTable">
+                <h2>Performance Insights</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Year</th>
-                                <th>Week</th>
-                                <th>Actual Total Payments</th>
-                                <th>Predicted Total Payments</th>
-                                <th>Avg. Payment Per Visit</th>
+                                <th>Period</th>
                                 <th>Performance</th>
-                                <th>Most Influential Performance Factors</th>
+                                <th>What Went Well</th>
+                                <th>What Could Be Improved</th>
                             </tr>
                         </thead>
-                        <tbody id="dataTableBody">
-                            <!-- Table data will be populated by JavaScript -->
-                        </tbody>
+                        <tbody id="insightsTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- Main Data Table Section -->
             <div class="section">
-                <h2>💡 What Drives Your Revenue</h2>
-                <div class="performance-grid">
-                    <div class="chart-container">
-                        <canvas id="driversChart"></canvas>
-                    </div>
-                    <div id="driversInsights">
-                        <!-- Insights will be populated by JavaScript -->
-                    </div>
+                <h2>Detailed Analysis</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Week</th>
+                                <th>Actual Payments</th>
+                                <th>Predicted Payments</th>
+                                <th>Absolute Error</th>
+                                <th>Performance</th>
+                                <th>Key Factors</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="section export-section">
-                <h2>📄 Export Your Analysis</h2>
-                <p>Download complete results and individual charts for your team</p>
+            <!-- Export Section -->
+            <div class="section">
+                <h2>Export Analysis</h2>
                 <div class="export-buttons">
-                    <button class="export-btn" id="exportCsvBtn">📊 CSV Export</button>
-                    <button class="export-btn" id="exportPdfBtn">📄 PDF Export</button>
-                    <button class="export-btn" id="runAnalysisBtn">🚀 Run Analysis</button>
-                    <button class="export-btn" id="resetBtn">🔄 Reset</button>
+                    <button id="exportCsv" class="btn btn-primary">
+                        <i class="fas fa-file-csv"></i> Export as CSV
+                    </button>
+                    <button id="exportPdf" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Export as PDF
+                    </button>
                 </div>
             </div>
         </div>

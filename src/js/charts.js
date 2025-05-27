@@ -62,7 +62,10 @@ export class ChartManager {
     }
 
     async generateCharts(results) {
+        console.log('Starting chart generation with results:', results);
+        
         if (!this.isInitialized) {
+            console.log('Chart manager not initialized, initializing now...');
             await this.init();
         }
         
@@ -79,93 +82,129 @@ export class ChartManager {
         chartContainers.forEach(id => {
             const container = document.getElementById(id);
             if (container) {
+                console.log(`Found container for ${id}`);
                 const chartContainer = container.closest('.chart-container');
                 if (chartContainer) {
                     chartContainer.style.display = 'block';
                     // Force a reflow
                     chartContainer.offsetHeight;
                     chartContainer.classList.add('visible');
+                    console.log(`Made ${id} container visible`);
+                } else {
+                    console.warn(`No .chart-container parent found for ${id}`);
                 }
+            } else {
+                console.warn(`Container element not found for ${id}`);
             }
         });
         
-        // Generate all charts
-        await Promise.all([
-            this.generateOverviewChart(results),
-            this.generatePerformanceChart(results),
-            this.generateTrendsChart(results),
-            this.generatePayerChart(results),
-            this.generateCorrelationChart(results)
-        ]);
-        
-        // Ensure all sections are visible
-        const sections = document.querySelectorAll('.section');
-        sections.forEach(section => {
-            section.style.display = 'block';
-            // Force a reflow
-            section.offsetHeight;
-            section.classList.add('visible');
-        });
+        try {
+            // Generate all charts
+            console.log('Starting to generate individual charts...');
+            
+            await Promise.all([
+                this.generateOverviewChart(results).catch(error => {
+                    console.error('Error generating overview chart:', error);
+                    throw error;
+                }),
+                this.generatePerformanceChart(results).catch(error => {
+                    console.error('Error generating performance chart:', error);
+                    throw error;
+                }),
+                this.generateTrendsChart(results).catch(error => {
+                    console.error('Error generating trends chart:', error);
+                    throw error;
+                }),
+                this.generatePayerChart(results).catch(error => {
+                    console.error('Error generating payer chart:', error);
+                    throw error;
+                }),
+                this.generateCorrelationChart(results).catch(error => {
+                    console.error('Error generating correlation chart:', error);
+                    throw error;
+                })
+            ]);
+            
+            console.log('All charts generated successfully');
+            
+            // Ensure all sections are visible
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = 'block';
+                // Force a reflow
+                section.offsetHeight;
+                section.classList.add('visible');
+            });
+            
+        } catch (error) {
+            console.error('Error during chart generation:', error);
+            throw error;
+        }
     }
 
-    generateOverviewChart(results) {
+    async generateOverviewChart(results) {
+        console.log('Generating overview chart with data:', results);
         const ctx = document.getElementById('overviewChart');
-        if (!ctx) return;
+        if (!ctx) {
+            console.error('Overview chart canvas not found');
+            return;
+        }
+        
+        try {
+            // Destroy existing chart if it exists
+            if (this.charts.overview) {
+                this.charts.overview.destroy();
+            }
+            
+            const data = this.prepareOverviewData(results);
+            console.log('Prepared overview chart data:', data);
+            
+            this.charts.overview = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: this.getChartOptions('Overview')
+            });
+            
+            console.log('Overview chart created successfully');
+        } catch (error) {
+            console.error('Error in generateOverviewChart:', error);
+            throw error;
+        }
+    }
 
-        // Get the last 6 months of data (approximately 26 weeks)
-        const data = results.finalResults.slice(-26);
-
-        const chartData = {
-            labels: data.map(d => `${d.year}-${d.week}`),
+    prepareOverviewData(results) {
+        console.log('Preparing overview data from results:', results);
+        if (!results || !results.finalResults) {
+            console.error('Invalid results data for overview chart:', results);
+            throw new Error('Invalid results data for overview chart');
+        }
+        
+        const labels = results.finalResults.map(week => `${week.Year}-${week.Week}`);
+        const actualData = results.finalResults.map(week => week['Actual Total Payments']);
+        const predictedData = results.finalResults.map(week => week['Predicted Total Payments']);
+        
+        console.log('Processed overview data:', { labels, actualData, predictedData });
+        
+        return {
+            labels: labels,
             datasets: [
                 {
-                    label: 'Actual Revenue',
-                    data: data.map(d => d.actualTotalPayments),
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                    fill: true
+                    label: 'Actual Payments',
+                    data: actualData,
+                    borderColor: this.colors.primary,
+                    backgroundColor: this.colors.primary + '20',
+                    tension: 0.4
                 },
                 {
-                    label: 'Predicted Revenue',
-                    data: data.map(d => d.predictedTotalPayments),
-                    borderColor: '#2196F3',
-                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                    fill: true
+                    label: 'Predicted Payments',
+                    data: predictedData,
+                    borderColor: this.colors.secondary,
+                    backgroundColor: this.colors.secondary + '20',
+                    borderDash: [5, 5],
+                    tension: 0.4
                 }
             ]
         };
-
-        const config = {
-            type: 'line',
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Revenue Overview (Last 6 Months)'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                return `${context.dataset.label}: ${this.formatCurrency(context.raw)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (value) => this.formatCurrency(value)
-                        }
-                    }
-                }
-            }
-        };
-
-        new Chart(ctx, config);
     }
 
     generatePerformanceChart(results) {
